@@ -208,10 +208,11 @@ Before reporting **done** on a task, confirm:
 - **Untested / incomplete:** Special-ammo pickups and full level progression are not implemented. Physical-device touch, weapon feel, balance and performance were not checked; no platform builds. The full test gate remains unmet due to the existing lighting test mismatch.
 - **Next:** Playtest all specials and touch controls on iPhone/iPad, tune damage, duration, projectile count and guidance, and reconcile the lighting test with the intended blur mode.
 
-### 2026-11-24 — Special weapon materials
+### 2026-11-24 — Special weapon materials and session close
 
 - **Implemented:** Confirmed both special weapon prefabs had a supported URP Unlit material; the chosen magenta resembled Unity's missing-shader color. Changed the laser to cyan and assigned a separate bright green URP material to the spread/missile projectile prefab. Existing weapon gameplay and camera placement were retained.
-- **Files/systems changed:** `MT_SpecialWeapon`, new `MT_SpecialProjectile`, `PF_SpecialProjectile`, new Edit Mode material configuration tests, and this handoff. Earlier uncommitted work was preserved.
+- **Files/systems changed:** `MT_SpecialWeapon`, new `MT_SpecialProjectile`, `PF_SpecialProjectile`, Edit Mode material configuration tests, README, GDD and this handoff. Earlier work was preserved.
 - **Verification:** Inspected the laser in iPhone and iPad Simulator and spread projectiles on iPhone. Both new material tests passed; the full Play Mode suite passed 29/29 on retry after the known intermittent UI press-animation test failed initially. Edit Mode passed 36/37; the pre-existing motion-blur mode/test mismatch remains.
 - **Untested / incomplete:** Physical iOS/Windows rendering and builds were not checked. The mandatory full test gate remains unmet because of the existing lighting test mismatch.
-- **Next:** Review weapon colors on physical devices and reconcile the lighting test with the intended blur mode.
+- **Next:** Ask the owner to playtest all specials, touch controls, weapon colors and balance on iPhone/iPad; tune from feedback. Then reconcile the lighting test with the intended blur mode and rerun both test suites.
+- **Session close:** Updated README and GDD with the current weapons, material colors, and verification status. No tests or builds were run for this documentation-only update.
