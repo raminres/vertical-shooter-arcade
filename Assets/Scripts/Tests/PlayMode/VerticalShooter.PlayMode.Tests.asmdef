@@ -1,0 +1,4 @@
+{
+    "name": "VerticalShooter.PlayMode.Tests",
+    "optionalUnityReferences": ["TestAssemblies"]
+}
