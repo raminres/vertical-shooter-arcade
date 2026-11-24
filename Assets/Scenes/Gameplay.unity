@@ -119,6 +119,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &935677441 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1519796191770196953, guid: 0f8785ea791bb4146a8f0b514bdd59d6, type: 3}
+  m_PrefabInstance: {fileID: 1368625399}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b250538c49c823b4992fa88e9fbd492d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VerticalShooter.Runtime::VerticalShooter.Gameplay.PrototypeCombat
 --- !u!1001 &1368625399
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -171,11 +182,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: PrototypeFlightRig
       objectReference: {fileID: 0}
+    - target: {fileID: 4750205481871116043, guid: 0f8785ea791bb4146a8f0b514bdd59d6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 16.83
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750205481871116043, guid: 0f8785ea791bb4146a8f0b514bdd59d6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.11
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0f8785ea791bb4146a8f0b514bdd59d6, type: 3}
+--- !u!114 &1368625400 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3034497015885138372, guid: 0f8785ea791bb4146a8f0b514bdd59d6, type: 3}
+  m_PrefabInstance: {fileID: 1368625399}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 285c62d6116b1a5409264c6dad3b76d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VerticalShooter.Runtime::VerticalShooter.Gameplay.PrototypeSpecialWeapon
 --- !u!1001 &1446939370
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -246,6 +276,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4401953734692505760, guid: feb18534e093ec34baa5c717b0f73f6a, type: 3}
+      propertyPath: combat
+      value: 
+      objectReference: {fileID: 935677441}
+    - target: {fileID: 4401953734692505760, guid: feb18534e093ec34baa5c717b0f73f6a, type: 3}
+      propertyPath: special
+      value: 
+      objectReference: {fileID: 1368625400}
     - target: {fileID: 6446897662528664225, guid: feb18534e093ec34baa5c717b0f73f6a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

@@ -67,6 +67,34 @@ MonoBehaviour:
     m_Key: main_menu
     m_Metadata:
       m_Items: []
+  - m_Id: 105770463416320
+    m_Key: level_failed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 105770492776448
+    m_Key: retry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430604697600
+    m_Key: choose_special
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834944
+    m_Key: focused_laser
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834945
+    m_Key: spread_barrage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834946
+    m_Key: homing_missiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834947
+    m_Key: special
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

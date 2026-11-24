@@ -11,6 +11,15 @@
                 <ui:Button name="credits" text="Credits" class="menu-button" />
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="weapon-panel" class="overlay hidden">
+            <ui:VisualElement class="dialog">
+                <ui:Label name="weapon-title" text="Choose Special" class="dialog-title" />
+                <ui:Button name="choose-laser" text="Focused Laser" class="primary-button" />
+                <ui:Button name="choose-spread" text="Spread Barrage" class="menu-button" />
+                <ui:Button name="choose-missiles" text="Homing Missiles" class="menu-button" />
+                <ui:Button name="weapon-back" text="Back" class="menu-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement name="options-panel" class="overlay hidden">
             <ui:VisualElement class="dialog">
                 <ui:Label name="options-title" text="Options" class="dialog-title" />

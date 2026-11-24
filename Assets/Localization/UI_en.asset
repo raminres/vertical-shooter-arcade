@@ -70,6 +70,34 @@ MonoBehaviour:
     m_Localized: Main Menu
     m_Metadata:
       m_Items: []
+  - m_Id: 105770463416320
+    m_Localized: Level Failed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 105770492776448
+    m_Localized: Retry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430604697600
+    m_Localized: Choose Special
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834944
+    m_Localized: Focused Laser
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834945
+    m_Localized: Spread Barrage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834946
+    m_Localized: Homing Missiles
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834947
+    m_Localized: SPECIAL
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -4,20 +4,20 @@
 
 **Updated:** 24 November 2026
 
-**Status:** Basic flight and automatic-fire prototype with placeholder visuals. Enemy attacks, player damage, progression, and numerical targets remain to be implemented and playtested.
+**Status:** Basic flight and combat prototype with placeholder visuals. Enemy fire, player health, retry, and the three selectable special weapons are implemented with provisional tuning; shields, progression, and numerical targets remain to be implemented and playtested.
 
 ## Current implementation status
 
 The sections below record agreed design intent, not a list of implemented gameplay features. The current project contains:
 
-- A `MainMenu` scene with New Game, Continue, Options, and Credits. New Game opens the `Gameplay` scene; Continue is disabled until save/progress functionality exists.
-- A `Gameplay` scene with a placeholder environment and HUD for health, stars, and a special action. The HUD values are placeholders and the special action is disabled. The pause menu provides Resume, Options, and Main Menu.
+- A `MainMenu` scene with New Game, Continue, Options, and Credits. New Game opens special-weapon selection before the `Gameplay` scene; Continue is disabled until save/progress functionality exists.
+- A `Gameplay` scene with a placeholder environment and HUD for health, stars, and a special action. Health and special charges reflect the current run; stars remain placeholders. The pause menu provides Resume, Options, and Main Menu.
 - English and Turkish UI strings, with English selected by default and a language selector in Options. Language selection is not yet persisted between sessions.
 - UI Toolkit button hover and press transitions, portrait scaling, and safe-area handling. The reference resolution is iPhone 15 (1179 × 2556); iPhone 15 and iPad mini 6 simulator profiles are present, with estimated iPad safe-area insets. The owner checked the earlier UI on an iPhone 15 and iPad mini 6; the new gameplay controls and framing still need physical-device testing.
 - iOS and Windows build profiles that use the shared scene list and Player Settings. The custom iOS Editor tool provides numbered output folders and version/build increments when invoked.
-- The gameplay scene has warm daylight, sky-colored ambient fill, subtle bloom and camera motion blur, a forward-scrolling perspective camera, repeating ground, a placeholder player plane with keyboard and touch-drag movement, automatic straight fire, and three pre-authored Light Fighters reused for simple straight and diagonal groups. A Light Fighter takes two shots; projectiles are pooled. Hits and kills use short haptic taps on supported devices, while the plane, camera, and hit reactions use eased motion. Movement and combat values are provisional and configurable in `Assets/Data/PrototypeFlightSettings.asset`.
+- The gameplay scene has warm daylight, sky-colored ambient fill, subtle bloom and camera motion blur, a forward-scrolling perspective camera, repeating ground, a placeholder player plane with keyboard and touch-drag movement, automatic straight fire, and eight pre-authored Light Fighters reused for simple straight and diagonal groups. A Light Fighter takes two shots; projectiles are pooled. Enemy defeats and player hits produce distinct pooled particle bursts. Hits and kills use short haptic taps on supported devices, while the plane, camera, and hit reactions use eased motion. Movement and combat values are provisional and configurable in `Assets/Data/PrototypeFlightSettings.asset`.
 
-Special weapons, player damage, enemy attacks, full wave progression, levels, saving, and the other mechanics described below remain **planned, not implemented**. The opening enemy groups are a movement test rather than the complete Level 1 encounter.
+Special-ammo pickups, shields, full wave progression, levels, saving, and the other mechanics described below remain **planned, not implemented**. The opening enemy groups are a movement test rather than the complete Level 1 encounter.
 
 ## 1. Overview and Scope
 
@@ -190,4 +190,4 @@ Do **not** finalize the following from written estimates alone:
 - Ground-turret placement synchronized with encounter-gated spawning while terrain scrolls continuously.
 - Boss patterns, environment arrangement, final visual palette, UI styling, SFX, and detailed level layouts.
 
-**Design status:** Basic flight, automatic fire, and enemy hits are in place; enemy attacks and the rest of the shooter combat loop are still planned. Exact balance values and further level-by-level design should remain provisional until the mechanics have been tested.
+**Design status:** Basic flight, automatic fire, selectable specials, enemy shots, player health, invulnerability, and retry are in place; shields and the rest of the shooter combat loop are still planned. Exact balance values and further level-by-level design should remain provisional until the mechanics have been tested.

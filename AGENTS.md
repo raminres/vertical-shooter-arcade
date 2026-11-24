@@ -13,7 +13,7 @@
 - **Tweening and haptics:** DOTween 1.3.045 is installed under `Assets/Plugins/Demigiant/DOTween` from the vendor download. RichHaptic 0.1.0 is installed via Unity Package Manager for iOS haptic feedback. Reference `RichHaptic.Runtime` from assemblies that use it. DOTween's standard tween runner creates a runtime GameObject, which conflicts with section 4; resolve that conflict with the owner before using the runner in gameplay. DOTween's Editor utility is disabled because it automatically changes Player Settings. Its optional modules are not configured. The plugin generated `Assets/Resources/DOTweenSettings.asset` as part of its installation.
 - **Player Settings:** Preserve the owner's Player Settings unless the owner explicitly requests a change. The iOS build tool intentionally increments version and build number when the owner starts a build through it.
 - **Build profiles:** `Assets/Settings/Build Profiles/iOS.asset` and `Windows.asset` inherit Player Settings and the shared MainMenu/Gameplay scene list. A build from the Build Profiles window does not invoke the custom iOS numbering tool.
-- **Current UI and localization:** MainMenu and Gameplay contain prototype menus, a placeholder HUD, and pause flow; Continue and the special action are disabled. English is the default; Turkish is selectable in Options. The UI reference is 1179 × 2556, with iPhone 15 and iPad mini 6 simulator profiles. The iPad simulator safe-area insets are estimates. The owner reports the earlier UI looks good on a physical iPhone 15 and iPad mini 6; the new gameplay controls and framing still need device checks. Device Simulator uses touch, so verify mouse hover in Game view.
+- **Current UI and localization:** MainMenu and Gameplay contain prototype menus, a placeholder HUD, and pause flow; Continue is disabled; New Game offers a special-weapon choice and the gameplay button consumes charges. English is the default; Turkish is selectable in Options. The UI reference is 1179 × 2556, with iPhone 15 and iPad mini 6 simulator profiles. The iPad simulator safe-area insets are estimates. The owner reports the earlier UI looks good on a physical iPhone 15 and iPad mini 6; the new gameplay controls and framing still need device checks. Device Simulator uses touch, so verify mouse hover in Game view.
 - **Design scope:** A small 3D vertical-scrolling shooter with movement constrained to a 2D playfield and a perspective camera. Follow the approved GDD when it is present; do not infer that an unapproved idea is a requirement.
 
 ## 2. Mandatory session workflow
@@ -176,42 +176,42 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — Device Simulator rounded corners
+### 2026-11-24 — Enemy fire and player health
 
-- **Completed:** Added transparent rounded-corner overlays and `presentation` data to the custom iPhone 15 and iPad mini 6 simulator profiles. Their corner radii are visual estimates (165 and 43 pixels); resolution, safe areas, and device system data remain unchanged. Updated build guidance: full platform builds are for appropriate milestones or platform-specific work, not every change.
-- **Files/systems changed:** Both `.device` profiles, two `TX_` overlay PNGs with metadata, Edit Mode presentation checks, and this handoff. Player Settings remained unchanged.
-- **Verification:** Inspected both rounded profiles in the Simulator, verified each profile's simulated resolution and safe area in Play Mode, and confirmed the underlying screen and system data match the previous versions. All 43 Edit Mode and Play Mode tests passed; no new console errors.
-- **Untested:** No iOS or Windows builds were run for this Editor-only change; corner radii remain approximate visual representations.
-- **Next:** Continue gameplay work and build for the target platforms at the next appropriate milestone or when requested.
+- **Implemented:** Light fighters fire straight shots from a 12-instance prefab-authored pool; shots are skipped when the pool is full. Swept hits remove 1 of 10 HP and grant 1 second of invulnerability. The HUD updates, and zero HP stops the run and opens a localized Retry/Main Menu panel. Enemy shot and health tuning are in `PrototypeFlightSettings`. Shields are not implemented.
+- **Files/systems changed:** Combat/flight and UI scripts, gameplay rig and scene, `PF_EnemyProjectile`, `MT_EnemyProjectile`, localized UI tables and UXML, Play Mode tests, README and GDD.
+- **Verification:** 21 Play Mode tests passed, covering automatic fire, hit damage and invulnerability, pool reuse, pause and retry. Inspected the shot in the iPhone Simulator and the failure panel in both iPhone 15 and iPad mini 6 Simulator profiles. Edit Mode: 34/35 passed; the existing lighting test still expects camera-only motion blur while the saved profile uses camera-and-objects.
+- **Untested / incomplete:** No real-device combat feel, performance or platform builds were checked. The mandatory full test gate remains unmet due to the existing lighting test mismatch.
+- **Next:** Reconcile the lighting test with the intended blur mode, rerun both suites, and playtest enemy shot readability, rate, and difficulty on device.
 
-### 2026-11-24 — Enemy haptics and DOTween easing
+### 2026-11-24 — More enemies and wider camera
 
-- **Completed:** Added RichHaptic LightImpact on non-lethal enemy hits and MediumImpact on kills, and DOTween-eased plane banking, subtle camera movement zoom and enemy hit recovery. Motion settings are in `Assets/Data/PrototypeFlightSettings.asset`. The owner explicitly allowed RichHaptic's single hidden iOS lifecycle GameObject as the limited exception recorded in section 4. DOTween is used only for easing calculations; its runtime manager is not started. Prior uncommitted Simulator profile changes were retained.
-- **Files/systems changed:** Runtime combat/flight code, haptic feedback adapter, runtime assembly references, flight settings, Edit/Play Mode tests, README, GDD and this handoff.
-- **Verification:** All 46 Edit Mode and Play Mode tests passed, including impact preset selection, hit/kill events, animation progress and settling, and unchanged scene GameObject count. Inspected plane banking and camera FOV in the Simulator. The iOS Xcode export succeeded with the same four existing localization/TextMesh Pro warnings; Player Settings and unrelated graphics reserialization were restored. No new console errors.
-- **Untested:** Haptic feel on physical iPhone, Xcode compilation/signing, and a new Windows build were not checked. Apple documents that iPad lacks Core Haptics support, so feedback is silently skipped there.
-- **Next:** Test the short hit/kill taps and movement feel on iPhone; tune motion settings or haptic presets based on the owner's feedback.
+- **Implemented:** Expanded the prefab-authored fighter pool from 3 to 6, set groups to 6 with 0.5-second spacing, spread the opening group across three lanes, and increased the gameplay camera FOV from 55 to 60 degrees. If all slots are occupied, spawning waits for a slot; groups still wait for the previous group to clear. Group size and spawn timing are tunable in `PrototypeFlightSettings`. Existing enemy fire and health work remains intact.
+- **Files/systems changed:** Flight settings and spawning, gameplay rig prefab, flight Play Mode tests, README, GDD and this handoff; prior uncommitted work was preserved.
+- **Verification:** All 22 Play Mode tests passed, including at least four visible enemies on both target aspect ratios and pool reuse. Inspected iPhone 15 and iPad mini 6 Simulator views. Edit Mode: 34/35 passed; the pre-existing camera-only versus camera-and-objects motion-blur test mismatch remains.
+- **Untested / incomplete:** Physical-device readability, performance and difficulty; no builds made. The full test gate remains unmet because of the existing lighting test mismatch.
+- **Next:** Playtest enemy density and zoom on the owner's devices; tune group size, spawn interval and FOV as needed, then reconcile the lighting test with the intended blur mode.
 
-### 2026-11-24 — Touch aircraft banking
+### 2026-11-24 — More fighters and impact particles
 
-- **Completed:** Changed touch banking to use swipe speed instead of per-frame distance, keeping the plane's roll consistent across frame rates. Keyboard banking and camera zoom retain their existing behavior. Added `touchBankFullSpeed` to `Assets/Data/PrototypeFlightSettings.asset` (screen widths per second for full bank).
-- **Files/systems changed:** `PrototypeFlight`, `FlightSettings`, the flight settings asset, Play Mode banking regression test, and this handoff. Existing uncommitted haptic and Simulator work was retained.
-- **Verification:** The new regression reproduced the weak roll before the fix and passed afterward for left/right swipes at 30 and 60 FPS. Inspected the banked plane in the iPhone Simulator. All 31 Edit Mode and 16 Play Mode tests passed in separate runs; earlier attempts encountered the existing intermittent UI animation tests and a Unity Test Runner scene-restoration error. No new errors appeared after recovery. Player Settings stayed unchanged.
-- **Untested:** Real-device touch banking; no player builds were made for this change.
-- **Next:** Ask the owner to try side-to-side touch movement on the iPhone/iPad and tune `touchBankFullSpeed` or `bankAngle` if needed.
+- **Implemented:** Expanded the pre-authored fighter pool and group size to eight, with 0.45-second spawn spacing. Saved the owner's Gameplay scene camera placement (local y 16.83, z -3.11) without changing its FOV. Enemy deaths emit orange/yellow bursts and actual player damage emits cyan/blue bursts.
+- **Files/systems changed:** Gameplay rig, scene, `PrototypeEffects`, flight/combat references, flight settings, 2 particle prefabs and material, Play Mode tests, README, GDD and this handoff. Preserved earlier uncommitted work. Four enemy effects and two player-hit effects are preallocated; when a pool is busy the visual is skipped, without affecting damage.
+- **Verification:** All 24 Play Mode tests passed, including particle triggers, invulnerability, exhaustion and reuse; inspected both effects on iPhone 15 and iPad mini 6 Simulator. Edit Mode 34/35 passed; the previously recorded camera-only versus camera-and-objects motion-blur mismatch remains.
+- **Untested / incomplete:** Physical-device readability and performance; no platform builds. Full verification remains incomplete because of the existing lighting test mismatch.
+- **Next:** Playtest density and effects on the owner's devices; tune effects in their prefabs and reconcile the lighting test with the intended blur mode.
 
-### 2026-11-24 — Gameplay lighting and post-processing
+### 2026-11-24 — Selectable special weapons
 
-- **Completed:** Added a prefab-authored warm directional sun and sky/ground ambient gradient to Gameplay, increased prototype material color contrast, and enabled a gameplay-only URP volume with bloom, low-quality camera-only motion blur, color adjustments and neutral tonemapping. Settings are in `Assets/Settings/GameplayDaylightProfile.asset`; the lighting prefab is `Assets/Prefabs/Environment/PF_GameplayLighting.prefab`.
-- **Files/systems changed:** Gameplay scene and camera rig prefab, prototype materials, new lighting prefab and volume profile, Edit Mode configuration tests and assembly references, README, GDD, and this handoff. Existing uncommitted touch, haptic and simulator work was retained. Player Settings and render-pipeline project assets remained unchanged.
-- **Verification:** All 51 Edit Mode and Play Mode tests passed. Inspected the iPhone and iPad Simulator previews, confirmed HDR and active volume settings, and compared the same paused frame with the volume on and off. A transient player-position NaN occurred once while opening Simulator before the lighting changes; no subsequent errors were observed.
-- **Untested:** Physical-device appearance, motion-blur visibility and performance; no new platform builds were run.
-- **Next:** Review the lighting and subtle effects on the owner's iPhone and iPad; tune or disable effects as needed for visual clarity and mobile performance.
+- **Implemented:** New Game opens English/Turkish special selection: focused laser, seven-shot spread or four homing missiles. One choice is fixed per run; each run starts with two charges, the HUD consumes and displays them, and Retry keeps the choice and restores charges. Primary fire remains active. Laser and projectiles use prefab-authored objects; the 14-shot pool skips an activation without charging if insufficient slots are free. Values are provisional in `Assets/Data/Weapons/SpecialWeaponSettings.asset`.
+- **Files/systems changed:** Special settings and combat scripts, flight rig and Gameplay scene, laser/projectile prefabs and material, MainMenu UXML/controller, Gameplay HUD, localization tables, Play Mode tests, README and GDD. Preserved earlier uncommitted work and the owner's camera placement.
+- **Verification:** All 29 Play Mode tests passed, including all selection paths, charge UI, damage, pause, retry, primary fire, homing and object count. Inspected the selection UI in both device simulators, laser on iPad and spread on iPhone. Edit Mode 34/35 passed; the pre-existing motion-blur mode/test mismatch remains.
+- **Untested / incomplete:** Special-ammo pickups and full level progression are not implemented. Physical-device touch, weapon feel, balance and performance were not checked; no platform builds. The full test gate remains unmet due to the existing lighting test mismatch.
+- **Next:** Playtest all specials and touch controls on iPhone/iPad, tune damage, duration, projectile count and guidance, and reconcile the lighting test with the intended blur mode.
 
-### 2026-11-24 — Reference camera framing
+### 2026-11-24 — Special weapon materials
 
-- **Implemented:** Tilted and repositioned the gameplay camera, scaled the player and pooled enemies, adjusted the enemy hit radius and perspective-aware movement bounds. Preserved the owner's reference screenshots and exempted those reference images from runtime asset naming checks.
-- **Files/systems changed:** Gameplay rig prefab, flight settings and movement, flight/combat and naming tests, this handoff. Existing uncommitted changes were retained.
-- **Verification:** Inspected the iPhone 15 and iPad mini 6 Simulator views. All 17 Play Mode tests passed. Edit Mode: 34/35 passed; `GameplayLightingTests.GameplayCameraAndProfileEnableRequestedEffects` expects camera-only motion blur, while the existing profile is set to camera-and-objects. This pre-existing settings/test mismatch was left unchanged.
-- **Untested / incomplete:** Physical-device framing and performance; no platform builds. The mandatory full test gate remains unmet until the lighting settings/test mismatch is resolved.
-- **Next:** Decide whether the current motion-blur mode is intentional, reconcile its test, rerun both suites, and review framing on iPhone and iPad.
+- **Implemented:** Confirmed both special weapon prefabs had a supported URP Unlit material; the chosen magenta resembled Unity's missing-shader color. Changed the laser to cyan and assigned a separate bright green URP material to the spread/missile projectile prefab. Existing weapon gameplay and camera placement were retained.
+- **Files/systems changed:** `MT_SpecialWeapon`, new `MT_SpecialProjectile`, `PF_SpecialProjectile`, new Edit Mode material configuration tests, and this handoff. Earlier uncommitted work was preserved.
+- **Verification:** Inspected the laser in iPhone and iPad Simulator and spread projectiles on iPhone. Both new material tests passed; the full Play Mode suite passed 29/29 on retry after the known intermittent UI press-animation test failed initially. Edit Mode passed 36/37; the pre-existing motion-blur mode/test mismatch remains.
+- **Untested / incomplete:** Physical iOS/Windows rendering and builds were not checked. The mandatory full test gate remains unmet because of the existing lighting test mismatch.
+- **Next:** Review weapon colors on physical devices and reconcile the lighting test with the intended blur mode.

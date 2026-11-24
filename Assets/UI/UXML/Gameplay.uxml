@@ -23,6 +23,13 @@
                 <ui:Button name="main-menu" text="Main Menu" class="menu-button" />
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="failed-panel" class="overlay hidden">
+            <ui:VisualElement class="dialog">
+                <ui:Label name="failed-title" text="Level Failed" class="dialog-title" />
+                <ui:Button name="retry" text="Retry" class="primary-button" />
+                <ui:Button name="failed-main-menu" text="Main Menu" class="menu-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement name="options-panel" class="overlay hidden">
             <ui:VisualElement class="dialog">
                 <ui:Label name="options-title" text="Options" class="dialog-title" />

@@ -23,6 +23,13 @@ MonoBehaviour:
   enemyHitTweenDuration: 0.12
   playerHalfWidth: 1
   playerHalfLength: 1
+  playerHitPoints: 10
+  playerInvulnerability: 1
+  playerHitRadius: 0.6
+  enemyProjectileDamage: 1
+  enemyFireInterval: 1.8
+  enemyProjectileSpeed: 7
+  enemyProjectileRadius: 0.16
   lightFighterHitPoints: 2
   projectileDamage: 1
   fireInterval: 0.3
@@ -30,5 +37,6 @@ MonoBehaviour:
   projectileRadius: 0.12
   enemyHitRadius: 0.6
   enemySpeed: 4
-  enemySpawnInterval: 0.9
+  enemiesPerGroup: 8
+  enemySpawnInterval: 0.45
   groupInterval: 1.5

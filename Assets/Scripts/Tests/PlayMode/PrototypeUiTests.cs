@@ -5,6 +5,7 @@ using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
+using VerticalShooter.Gameplay;
 
 namespace VerticalShooter.Tests
 {
@@ -36,8 +37,47 @@ namespace VerticalShooter.Tests
             Assert.That(root.Q<VisualElement>("credits-panel").ClassListContains("hidden"), Is.False);
             Click(root.Q<Button>("credits-back"));
             Click(root.Q<Button>("new-game"));
+            Assert.That(root.Q<VisualElement>("weapon-panel").ClassListContains("hidden"), Is.False);
+            Click(root.Q<Button>("choose-spread"));
             yield return null;
+            Assert.That(Object.FindAnyObjectByType<PrototypeSpecialWeapon>().Selected, Is.EqualTo(SpecialWeaponType.Spread));
             Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("Gameplay"));
+        }
+
+        [UnityTest]
+        public IEnumerator EachMenuChoiceStartsTheCorrectWeapon()
+        {
+            foreach (var entry in new[] { ("choose-laser", SpecialWeaponType.Laser), ("choose-spread", SpecialWeaponType.Spread), ("choose-missiles", SpecialWeaponType.Missiles) })
+            {
+                yield return SceneManager.LoadSceneAsync("MainMenu");
+                yield return null;
+                var root = Object.FindAnyObjectByType<UIDocument>().rootVisualElement;
+                Click(root.Q<Button>("new-game"));
+                Click(root.Q<Button>(entry.Item1));
+                yield return null;
+                Assert.That(Object.FindAnyObjectByType<PrototypeSpecialWeapon>().Selected, Is.EqualTo(entry.Item2));
+            }
+            SpecialWeaponSelection.Selected = SpecialWeaponType.Laser;
+        }
+
+        [UnityTest]
+        public IEnumerator SpecialButtonUsesChargesAndDisablesWhenEmpty()
+        {
+            SpecialWeaponSelection.Selected = SpecialWeaponType.Spread;
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var root = Object.FindAnyObjectByType<UIDocument>().rootVisualElement;
+            var special = Object.FindAnyObjectByType<PrototypeSpecialWeapon>();
+            var button = root.Q<Button>("special");
+            Assert.That(button.enabledSelf, Is.True);
+            Click(button);
+            Assert.That(special.Charges, Is.EqualTo(1));
+            Assert.That(button.text, Does.EndWith("1"));
+            Click(button);
+            Assert.That(special.Charges, Is.Zero);
+            Assert.That(button.text, Does.EndWith("0"));
+            Assert.That(button.enabledSelf, Is.False);
+            SpecialWeaponSelection.Selected = SpecialWeaponType.Laser;
         }
 
         [UnityTest]
@@ -46,7 +86,7 @@ namespace VerticalShooter.Tests
             yield return SceneManager.LoadSceneAsync("Gameplay");
             yield return null;
             var root = Object.FindAnyObjectByType<UIDocument>().rootVisualElement;
-            Assert.That(root.Q<Button>("special").enabledSelf, Is.False);
+            Assert.That(root.Q<Button>("special").enabledSelf, Is.True);
             Click(root.Q<Button>("pause"));
             Assert.That(Time.timeScale, Is.Zero);
             Assert.That(root.Q<VisualElement>("pause-panel").ClassListContains("hidden"), Is.False);
@@ -60,6 +100,25 @@ namespace VerticalShooter.Tests
             yield return null;
             Assert.That(Time.timeScale, Is.EqualTo(1f));
             Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("MainMenu"));
+        }
+
+        [UnityTest]
+        public IEnumerator HealthDisplayAndRetryFollowPlayerDamage()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var combat = Object.FindAnyObjectByType<PrototypeCombat>();
+            var root = Object.FindAnyObjectByType<UIDocument>().rootVisualElement;
+            Assert.That(root.Q<Label>("health-value").text, Is.EqualTo("10 / 10"));
+            Assert.That(combat.DamagePlayer(10), Is.True);
+            Assert.That(root.Q<Label>("health-value").text, Is.EqualTo("0 / 10"));
+            Assert.That(root.Q<VisualElement>("failed-panel").ClassListContains("hidden"), Is.False);
+            Assert.That(combat.IsDefeated, Is.True);
+            Click(root.Q<Button>("retry"));
+            yield return null;
+            combat = Object.FindAnyObjectByType<PrototypeCombat>();
+            Assert.That(combat.PlayerHealth, Is.EqualTo(10));
+            Assert.That(combat.IsDefeated, Is.False);
         }
 
         [UnityTest]

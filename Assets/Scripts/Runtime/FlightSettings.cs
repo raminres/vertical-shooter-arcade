@@ -16,6 +16,13 @@ namespace VerticalShooter.Gameplay
         [Min(0.01f)] public float enemyHitTweenDuration = .12f;
         [Min(0f)] public float playerHalfWidth = 1f;
         [Min(0f)] public float playerHalfLength = 1f;
+        [Min(1)] public int playerHitPoints = 10;
+        [Min(0f)] public float playerInvulnerability = 1f;
+        [Min(0.01f)] public float playerHitRadius = .6f;
+        [Min(1)] public int enemyProjectileDamage = 1;
+        [Min(0.1f)] public float enemyFireInterval = 1.8f;
+        [Min(0.1f)] public float enemyProjectileSpeed = 7f;
+        [Min(0.01f)] public float enemyProjectileRadius = .16f;
         [Min(1)] public int lightFighterHitPoints = 2;
         [Min(1)] public int projectileDamage = 1;
         [Min(0.01f)] public float fireInterval = .3f;
@@ -23,6 +30,7 @@ namespace VerticalShooter.Gameplay
         [Min(0.01f)] public float projectileRadius = .12f;
         [Min(0.01f)] public float enemyHitRadius = .75f;
         [Min(0f)] public float enemySpeed = 4f;
+        [Min(1)] public int enemiesPerGroup = 6;
         [Min(0.1f)] public float enemySpawnInterval = 0.9f;
         [Min(0.1f)] public float groupInterval = 1.5f;
     }

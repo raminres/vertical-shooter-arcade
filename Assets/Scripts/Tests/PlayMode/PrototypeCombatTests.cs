@@ -12,6 +12,125 @@ namespace VerticalShooter.Tests
     public class PrototypeCombatTests
     {
         [UnityTest]
+        public IEnumerator EnemyDefeatAndPlayerDamageTriggerDistinctEffects()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            var combat = Object.FindAnyObjectByType<PrototypeCombat>();
+            var systems = flight.GetComponentsInChildren<ParticleSystem>(true);
+            var explosions = systems.Where(x => x.name.StartsWith("EnemyExplosion")).ToArray();
+            var hits = systems.Where(x => x.name.StartsWith("PlayerHit")).ToArray();
+            Assert.That(explosions.Length, Is.EqualTo(4));
+            Assert.That(hits.Length, Is.EqualTo(2));
+            Assert.That(explosions[0].main.startColor.colorMin.r, Is.GreaterThan(explosions[0].main.startColor.colorMin.b));
+            Assert.That(hits[0].main.startColor.colorMin.b, Is.GreaterThan(hits[0].main.startColor.colorMin.r));
+            for (int i = 0; i < 100 && flight.ActiveEnemies == 0; i++)
+                flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            int enemy = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
+            Vector3 enemyPosition = flight.GetEnemy(enemy).position;
+            Assert.That(flight.DamageEnemy(enemy, 1), Is.False);
+            Assert.That(explosions.Any(x => x.isPlaying), Is.False);
+            Assert.That(flight.DamageEnemy(enemy, 1), Is.True);
+            var explosion = explosions.Single(x => x.isPlaying);
+            Assert.That(Vector3.Distance(explosion.transform.position, enemyPosition), Is.LessThan(.01f));
+            Assert.That(combat.DamagePlayer(1), Is.True);
+            var hit = hits.Single(x => x.isPlaying);
+            Assert.That(Vector3.Distance(hit.transform.position, flight.Aircraft.position), Is.LessThan(.01f));
+            Assert.That(combat.DamagePlayer(1), Is.False);
+            Assert.That(hits.Count(x => x.isPlaying), Is.EqualTo(1), "Invulnerable hits do not create another effect.");
+            yield return null;
+            Assert.That(explosion.particleCount, Is.GreaterThan(0));
+            Assert.That(hit.particleCount, Is.GreaterThan(0));
+        }
+
+        [UnityTest]
+        public IEnumerator ImpactEffectsSkipWhenBusyAndReuseExistingSystems()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            var effects = flight.GetComponent<PrototypeEffects>();
+            int count = flight.GetComponentsInChildren<ParticleSystem>(true).Length;
+            int objects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length;
+            for (int i = 0; i < 4; i++) Assert.That(effects.PlayEnemyExplosion(Vector3.zero), Is.True);
+            Assert.That(effects.PlayEnemyExplosion(Vector3.zero), Is.False);
+            for (int i = 0; i < 2; i++) Assert.That(effects.PlayPlayerHit(Vector3.zero), Is.True);
+            Assert.That(effects.PlayPlayerHit(Vector3.zero), Is.False);
+            yield return new WaitForSeconds(1f);
+            Assert.That(effects.PlayEnemyExplosion(Vector3.one), Is.True);
+            Assert.That(effects.PlayPlayerHit(Vector3.one), Is.True);
+            Assert.That(flight.GetComponentsInChildren<ParticleSystem>(true).Length, Is.EqualTo(count));
+            Assert.That(Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(objects));
+        }
+
+        [UnityTest]
+        public IEnumerator EnemyProjectilesDamagePlayerAndRespectInvulnerability()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            var combat = Object.FindAnyObjectByType<PrototypeCombat>();
+            for (int i = 0; i < 100 && flight.ActiveEnemies == 0; i++)
+                flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            int enemy = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
+            flight.GetEnemy(enemy).localPosition = flight.Aircraft.localPosition + Vector3.forward * 1.4f;
+            Assert.That(combat.PlayerHealth, Is.EqualTo(10));
+            combat.CaptureEnemies();
+            Assert.That(combat.TryFireEnemy(enemy), Is.True);
+            combat.Simulate(.11f);
+            Assert.That(combat.PlayerHealth, Is.EqualTo(9));
+            combat.CaptureEnemies();
+            Assert.That(combat.TryFireEnemy(enemy), Is.True);
+            combat.Simulate(.11f);
+            Assert.That(combat.PlayerHealth, Is.EqualTo(9), "A second hit during invulnerability must not remove health.");
+            combat.CaptureEnemies();
+            combat.Simulate(1.01f);
+            combat.CaptureEnemies();
+            Assert.That(combat.TryFireEnemy(enemy), Is.True);
+            combat.Simulate(.11f);
+            Assert.That(combat.PlayerHealth, Is.EqualTo(8));
+        }
+
+        [UnityTest]
+        public IEnumerator VisibleEnemyFiresAutomatically()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            var combat = Object.FindAnyObjectByType<PrototypeCombat>();
+            for (int i = 0; i < 100 && flight.ActiveEnemies == 0; i++)
+                flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            int enemy = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
+            flight.GetEnemy(enemy).localPosition = flight.Aircraft.localPosition + new Vector3(1.5f, 0f, 9f);
+            for (int i = 0; i < 150 && combat.ActiveEnemyProjectiles == 0; i++)
+                flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            Assert.That(combat.ActiveEnemyProjectiles, Is.GreaterThan(0));
+        }
+
+        [UnityTest]
+        public IEnumerator EnemyProjectilePoolSkipsAndReusesSlots()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            var combat = Object.FindAnyObjectByType<PrototypeCombat>();
+            for (int i = 0; i < 100 && flight.ActiveEnemies == 0; i++)
+                flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            int enemy = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
+            flight.GetEnemy(enemy).localPosition += Vector3.right * 100f;
+            int startingObjectCount = flight.GetComponentsInChildren<Transform>(true).Length;
+            for (int i = 0; i < combat.EnemyProjectileCapacity; i++) Assert.That(combat.TryFireEnemy(enemy), Is.True);
+            Assert.That(combat.TryFireEnemy(enemy), Is.False);
+            Assert.That(combat.ActiveEnemyProjectiles, Is.EqualTo(combat.EnemyProjectileCapacity));
+            combat.CaptureEnemies();
+            combat.Simulate(10f);
+            Assert.That(combat.ActiveEnemyProjectiles, Is.LessThan(combat.EnemyProjectileCapacity));
+            Assert.That(combat.TryFireEnemy(enemy), Is.True);
+            Assert.That(flight.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(startingObjectCount));
+        }
+
+        [UnityTest]
         public IEnumerator AutomaticFireDamagesAndDefeatsAnEnemy()
         {
             yield return SceneManager.LoadSceneAsync("Gameplay");
@@ -135,6 +254,11 @@ namespace VerticalShooter.Tests
             yield return null;
             var flight = Object.FindAnyObjectByType<PrototypeFlight>();
             var combat = Object.FindAnyObjectByType<PrototypeCombat>();
+            for (int i = 0; i < 100 && flight.ActiveEnemies == 0; i++)
+                flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            int enemy = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
+            Assert.That(combat.TryFireEnemy(enemy), Is.True);
+            var enemyProjectile = flight.GetComponentsInChildren<Transform>(true).First(t => t.name.StartsWith("EnemyProjectile") && t.gameObject.activeSelf);
             Assert.That(combat.TryFire(), Is.True);
             var projectile = flight.GetComponentsInChildren<Transform>(true).First(t => t.name.StartsWith("Projectile") && t.gameObject.activeSelf);
             var oldTimeScale = Time.timeScale;
@@ -142,10 +266,14 @@ namespace VerticalShooter.Tests
             {
                 Time.timeScale = 0f;
                 var position = projectile.localPosition;
+                var enemyPosition = enemyProjectile.localPosition;
+                int enemyActive = combat.ActiveEnemyProjectiles;
                 int active = combat.ActiveProjectiles;
                 yield return new WaitForSecondsRealtime(.2f);
                 Assert.That(projectile.localPosition, Is.EqualTo(position));
                 Assert.That(combat.ActiveProjectiles, Is.EqualTo(active));
+                Assert.That(enemyProjectile.localPosition, Is.EqualTo(enemyPosition));
+                Assert.That(combat.ActiveEnemyProjectiles, Is.EqualTo(enemyActive));
             }
             finally { Time.timeScale = oldTimeScale; }
         }

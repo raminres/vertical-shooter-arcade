@@ -65,7 +65,7 @@ namespace VerticalShooter.Tests
                     maxX = Mathf.Max(maxX, point.x);
                 }
             }
-            Assert.That(maxX - minX, Is.InRange(.24f, .33f));
+            Assert.That(maxX - minX, Is.InRange(.14f, .29f));
             camera.ResetAspect();
         }
 
@@ -76,12 +76,14 @@ namespace VerticalShooter.Tests
             yield return null;
             var flight = Object.FindAnyObjectByType<PrototypeFlight>();
             var all = flight.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("LightFighter")).ToArray();
-            Assert.That(all.Length, Is.EqualTo(3));
+            Assert.That(all.Length, Is.EqualTo(8));
+            var combat = Object.FindAnyObjectByType<PrototypeCombat>();
             int appearances = 0;
             var previous = new bool[all.Length];
             for (int step = 0; step < 1000; step++)
             {
                 flight.Simulate(.1f, Vector2.zero, Vector2.zero);
+                if (combat.IsDefeated) break;
                 Assert.That(flight.ActiveEnemies, Is.InRange(0, flight.Capacity));
                 for (int i = 0; i < all.Length; i++)
                 {
@@ -90,7 +92,35 @@ namespace VerticalShooter.Tests
                 }
             }
             Assert.That(appearances, Is.GreaterThan(8), "Slots should be reused over multiple groups.");
-            Assert.That(flight.GetComponentsInChildren<Transform>(true).Count(t => t.name.StartsWith("LightFighter")), Is.EqualTo(3));
+            Assert.That(flight.GetComponentsInChildren<Transform>(true).Count(t => t.name.StartsWith("LightFighter")), Is.EqualTo(8));
+        }
+
+        [UnityTest]
+        public IEnumerator SeveralEnemiesCanAppearOnScreenTogether()
+        {
+            foreach (float aspect in new[] { 1179f / 2556f, 1488f / 2266f })
+            {
+                yield return SceneManager.LoadSceneAsync("Gameplay");
+                yield return null;
+                var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+                flight.FlightCamera.aspect = aspect;
+                int mostVisible = 0;
+                for (int step = 0; step < 350; step++)
+                {
+                    flight.Simulate(.02f, Vector2.right, Vector2.zero);
+                    int visible = 0;
+                    for (int i = 0; i < flight.Capacity; i++)
+                    {
+                        var enemy = flight.GetEnemy(i);
+                        if (!enemy.gameObject.activeSelf) continue;
+                        var view = flight.FlightCamera.WorldToViewportPoint(enemy.position);
+                        if (view.z > 0f && view.x >= 0f && view.x <= 1f && view.y >= 0f && view.y <= 1f) visible++;
+                    }
+                    mostVisible = Mathf.Max(mostVisible, visible);
+                }
+                Assert.That(mostVisible, Is.GreaterThanOrEqualTo(4), $"Four fighters should be visible at aspect {aspect}.");
+                flight.FlightCamera.ResetAspect();
+            }
         }
 
         [UnityTest]

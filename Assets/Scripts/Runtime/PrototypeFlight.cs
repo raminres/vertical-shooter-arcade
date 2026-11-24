@@ -16,6 +16,8 @@ namespace VerticalShooter.Gameplay
         [SerializeField] private Transform[] enemies;
         [SerializeField] private float groundLength = 30f;
         [SerializeField] private PrototypeCombat combat;
+        [SerializeField] private PrototypeEffects effects;
+        [SerializeField] private PrototypeSpecialWeapon special;
 
         private Vector3[] enemyDirections;
         private int[] enemyHealth;
@@ -104,8 +106,9 @@ namespace VerticalShooter.Gameplay
 
         public void Simulate(float deltaTime, Vector2 move, Vector2 drag)
         {
-            if (deltaTime <= 0f) return;
+            if (deltaTime <= 0f || combat.IsDefeated) return;
             combat.CaptureEnemies();
+            special.CaptureEnemies();
             transform.position += Vector3.forward * (settings.scrollSpeed * deltaTime);
             foreach (var tile in groundSections)
             {
@@ -133,6 +136,7 @@ namespace VerticalShooter.Gameplay
             aircraft.position = position;
             TickEnemies(deltaTime);
             combat.Simulate(deltaTime);
+            special.Simulate(deltaTime);
         }
 
         private void ApplyMotionTweens(float deltaTime, float bankInput, float cameraInput)
@@ -180,6 +184,7 @@ namespace VerticalShooter.Gameplay
                 EnemyHit?.Invoke(false);
                 return false;
             }
+            effects.PlayEnemyExplosion(enemies[index].position);
             enemies[index].gameObject.SetActive(false);
             ActiveEnemies--;
             EnemyHit?.Invoke(true);
@@ -209,13 +214,13 @@ namespace VerticalShooter.Gameplay
                 }
             }
             timer -= deltaTime;
-            int count = group == 0 ? 2 : 3;
+            int count = Mathf.Max(1, settings.enemiesPerGroup);
             if (spawned < count && timer <= 0f)
             {
                 for (int i = 0; i < enemies.Length; i++)
                 {
                     if (enemies[i].gameObject.activeSelf) continue;
-                    float x = group == 0 ? 0.5f : (group == 1 ? 0.22f : 0.78f);
+                    float x = group == 0 ? 0.32f + (spawned % 3) * 0.18f : (group == 1 ? 0.22f : 0.78f);
                     enemies[i].position = PointOnPlane(new Vector2(x, 1.12f), aircraft.position.y);
                     enemyDirections[i] = group == 0 ? Vector3.back : new Vector3(group == 1 ? 0.3f : -0.3f, 0f, -1f).normalized;
                     enemyHitTimers[i] = 0f;
