@@ -13,7 +13,7 @@
 - **Tweening and haptics:** DOTween 1.3.045 is installed under `Assets/Plugins/Demigiant/DOTween` from the vendor download. RichHaptic 0.1.0 is installed via Unity Package Manager for iOS haptic feedback. Reference `RichHaptic.Runtime` from assemblies that use it. DOTween's standard tween runner creates a runtime GameObject, which conflicts with section 4; resolve that conflict with the owner before using the runner in gameplay. DOTween's Editor utility is disabled because it automatically changes Player Settings. Its optional modules are not configured. The plugin generated `Assets/Resources/DOTweenSettings.asset` as part of its installation.
 - **Player Settings:** Preserve the owner's Player Settings unless the owner explicitly requests a change. The iOS build tool intentionally increments version and build number when the owner starts a build through it.
 - **Build profiles:** `Assets/Settings/Build Profiles/iOS.asset` and `Windows.asset` inherit Player Settings and the shared MainMenu/Gameplay scene list. A build from the Build Profiles window does not invoke the custom iOS numbering tool.
-- **Current UI and localization:** MainMenu and Gameplay contain prototype menus, a placeholder HUD, and pause flow; Continue and the special action are disabled. English is the default; Turkish is selectable in Options. The UI reference is 1179 × 2556, with iPhone 15 and iPad mini 6 simulator profiles. The iPad safe-area insets are estimates, and real-device checks are outstanding. Device Simulator uses touch, so verify mouse hover in Game view.
+- **Current UI and localization:** MainMenu and Gameplay contain prototype menus, a placeholder HUD, and pause flow; Continue and the special action are disabled. English is the default; Turkish is selectable in Options. The UI reference is 1179 × 2556, with iPhone 15 and iPad mini 6 simulator profiles. The iPad simulator safe-area insets are estimates. The owner reports the earlier UI looks good on a physical iPhone 15 and iPad mini 6; the new gameplay controls and framing still need device checks. Device Simulator uses touch, so verify mouse hover in Game view.
 - **Design scope:** A small 3D vertical-scrolling shooter with movement constrained to a 2D playfield and a perspective camera. Follow the approved GDD when it is present; do not infer that an unapproved idea is a requirement.
 
 ## 2. Mandatory session workflow
@@ -125,6 +125,8 @@ Assets/
     Presets/
 ```
 
+- Name all new project-owned assets using these case-sensitive prefixes: **`PF_`** prefab, **`MT_`** base material, **`MI_`** material variant or intentionally derived material instance, **`TX_`** texture, **`SM_`** static mesh/model, **`SK_`** skinned mesh/model, and **`AU_`** audio clip. For an imported model containing skinned meshes use `SK_`; use `SM_` for a static-only model. Imported mesh subassets are named by their source model; do not break model imports to rename them. Unity material variants with a parent must use `MI_`.
+- Apply prefixes to asset filenames while preserving `.meta` GUIDs via Unity's asset move/rename APIs. Preserve vendor-managed assets under `Assets/Plugins` and Unity tutorial assets under `Assets/TutorialInfo` without renaming them. Run `AssetNamingTests` and the required full suites to catch violations; project-owned assets belong in the designated folders.
 - Create and maintain **Unity Preset assets** for imported textures, UI icons/sprites, audio, and FBX/model assets; use separate presets for materially different categories (for example UI icons vs world textures, SFX vs music).
 - Configure **Preset Manager importer filters** or a documented, tested folder-based preset application workflow so the correct preset is applied based on the intended asset folder. Merely storing `.preset` files in folders is not assumed to auto-apply them.
 - Preset Manager applies the presets in `Assets/Settings/Presets` to new assets under `Assets/Art/Textures`, `Assets/UI/Icons`, `Assets/Audio/SFX`, `Assets/Audio/Music`, and `Assets/Art/Models` using folder glob filters. To apply updated defaults to an existing asset, use Reset in the importer's Inspector context menu. Reset replaces the asset's importer settings with the applicable defaults.
@@ -173,30 +175,6 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — UI interaction and device layouts
-
-- **Completed:** Added button hover and pressed styles, set the UI reference resolution to 1179 × 2556, and changed safe-area calculations to use the Device Simulator-aware screen API. Added iPhone 15 and iPad mini 6 simulator profiles; the iPad safe-area insets are estimates.
-- **Files/systems changed:** UI USS and PanelSettings, runtime safe-area calculation, Edit Mode tests, and Device Simulator profiles. Player Settings remained unchanged.
-- **Verification:** Unity compiled; all 20 Edit Mode and Play Mode tests passed. Inspected the main menu in Play Mode for both simulator profiles with safe-area highlighting, and verified the simulator reported each profile's dimensions and safe area.
-- **Untested:** Physical iOS safe areas, touch feedback, Xcode compilation, and new Windows/iOS builds were not checked in this session. The iPad mini safe-area values require verification on hardware.
-- **Next:** Verify menu, gameplay and pause screens, touch feedback and safe areas on the owner's iPhone 15 and iPad mini 6, and run platform builds at the next suitable milestone.
-
-### 2026-11-24 — Button animation polish
-
-- **Completed:** Added UI Toolkit transitions for button scale and color on hover and press, including pause-menu buttons; disabled buttons do not respond. Player Settings remained unchanged.
-- **Files/systems changed:** `Assets/UI/USS/Prototype.uss` and Play Mode UI tests.
-- **Verification:** Unity compiled successfully; all 21 Edit Mode and Play Mode tests passed, including hover and press state checks while time is paused. Inspected the running simulator and checked the resolved hover and pressed styles with simulated pointer input.
-- **Untested:** Physical iOS touch feedback and new platform builds remain unverified.
-- **Next:** Try the button feel on iPhone and iPad and adjust timing or scale if desired.
-
-### 2026-11-24 — Simulator hover and English default
-
-- **Completed:** Made English the startup locale before the system language, retaining the language buttons and command-line override. Mouse hover uses a class driven by mouse pointer events, preventing simulated touch from leaving a button in the hover state; touch retains the press animation.
-- **Files/systems changed:** Localization Settings, UI Toolkit stylesheet and screen controller, Edit Mode and Play Mode tests. Player Settings remained unchanged.
-- **Verification:** Unity compiled, all 23 Edit Mode and Play Mode tests passed, including every main-menu hover state, disabled behavior, simulated touch entry, paused press, and locale selector order. The Game view displayed English. Console reported no current errors or warnings.
-- **Untested:** Physical mouse interaction and iOS touch were not directly inspected; the computer-use native connection was unavailable. Device Simulator simulates touch rather than continuous hover. Platform builds were not run.
-- **Next:** Try mouse hover in Game view and tap feedback in Device Simulator and on physical devices.
-
 ### 2026-11-24 — iOS and Windows build profiles
 
 - **Completed:** Created iOS and Windows 64-bit Player Build Profiles in `Assets/Settings/Build Profiles`; both inherit the shared scene list and Player Settings. Neither profile was activated, and Player Settings remained byte-for-byte unchanged.
@@ -212,3 +190,27 @@ Before reporting **done** on a task, confirm:
 - **Verification:** Compared the documents with the current scenes, UI, localization settings, build profiles, project configuration, Git history, and prior test results. The connected Unity Editor reported ready. No tests or builds were run for this documentation-only session.
 - **Open:** Physical iPhone 15/iPad mini 6 layout and touch checks, new profile-based Windows/iOS builds, and an export through the custom iOS tool remain unverified. Two existing UI animation tests failed intermittently on the first run in the previous session, then all 25 tests passed. DOTween's runtime GameObject conflicts with the prefab-only rule.
 - **Next:** Ask the owner which gameplay feature to prototype next; no specific next feature has been approved. Before implementing it, review the GDD and current branch, preserve Player Settings, and run the required tests.
+
+### 2026-11-24 — Flight and enemy movement prototype
+
+- **Completed:** Extended Gameplay with a forward-moving perspective camera, three looping prefab-authored ground sections, a placeholder plane using keyboard and touch-drag input, and three preallocated Light Fighters in repeating straight/diagonal groups. The pool waits for a slot when full and reuses enemies after they leave the view; no runtime gameplay GameObjects are created. Tunable values are in `Assets/Data/PrototypeFlightSettings.asset`. Updated README and GDD.
+- **Files/systems changed:** Gameplay scene; player, enemy, ground and flight-rig prefabs; prototype materials; flight settings and runtime scripts; Input System assembly references; Play Mode tests. The owner reports the earlier UI looked good on iPhone 15 and iPad mini 6.
+- **Verification:** Unity compiled; all 29 Edit Mode and Play Mode tests passed after final changes, covering keyboard and simulated touch, bounds on both target aspect ratios, pool reuse, and pause. Inspected gameplay in iPhone 15 and iPad mini simulator profiles. An iOS Xcode export and Windows build succeeded. The iOS report contained four existing localization/TextMesh Pro warnings; the Windows report contained six URP shadow-array warnings after switching targets. An initial Windows build was interrupted during target reload; the retry succeeded. Restored the iOS target, original Player Settings hash, and unrelated build-generated graphics changes.
+- **Untested:** The new flight controls and gameplay framing have not been tested on physical devices; the Xcode project has not been compiled or signed. No shooting, collisions, damage, enemy attacks or full wave system has been implemented.
+- **Next:** Have the owner try the new flight controls and camera on iPhone and iPad, tune movement via the settings asset, then agree on the next feature such as automatic fire and enemy hits.
+
+### 2026-11-24 — Asset naming convention
+
+- **Completed:** Renamed project-owned prefab and material assets to `PF_` and `MT_` using Unity's asset database; preserved all 13 GUIDs. Recorded `PF_`, `MT_`, `MI_`, `TX_`, `SM_`, `SK_`, and `AU_` naming rules and vendor exceptions above. Added Edit Mode checks for naming, imported models and material variants.
+- **Files/systems changed:** Prefab and material asset names and metadata; `AssetNamingTests`; this handoff. Prior uncommitted flight work was retained.
+- **Verification:** Unity confirmed zero GUID mismatches and no missing Gameplay dependencies; the renamed gameplay scene was inspected in Play Mode. The full 34-test Edit/Play Mode run passed on retry; the first run failed the previously intermittent button-animation test.
+- **Untested:** No new platform builds or physical-device checks were run for these asset renames.
+- **Next:** Continue the flight prototype after the owner tests movement and framing; enforce the naming rules for all new project-owned assets.
+
+### 2026-11-24 — Automatic fire and light-fighter hits
+
+- **Completed:** Added automatic straight shots, a 16-instance prefab-authored projectile pool, swept hit detection against moving light fighters, two-hit health with a brief non-lethal hit reaction, enemy reuse/health reset, and pause support. When the projectile pool is full, a shot is skipped until the next interval. Fire rate, speed, radii, damage and enemy health are tunable in `Assets/Data/PrototypeFlightSettings.asset`. Updated README and GDD.
+- **Files/systems changed:** Flight and combat scripts/configuration, `PF_PrototypeFlightRig` and new `PF_PrototypeProjectile`/`MT_PrototypeProjectile` assets, Edit Mode and Play Mode tests, docs and this handoff. Existing uncommitted changes were retained.
+- **Verification:** All 41 Edit Mode and Play Mode tests passed after the final changes, covering swept collisions, actual hits and defeat, enemy reuse/health reset, projectile pool exhaustion/reuse and pausing. Inspected shots in iPhone 15 and iPad mini simulator profiles. Windows build and iOS Xcode export succeeded with the previously seen six URP shadow-array and four localization/TextMesh Pro warnings, respectively. A transient NullReference during the intermediate unwired prefab state was resolved when the prefab was wired; no subsequent captured errors. Restored iOS target, original Player Settings hash and unrelated build-generated graphics changes.
+- **Untested:** Physical-device combat and Xcode compilation/signing. Enemy attacks, player damage, special weapons and full waves are not implemented.
+- **Next:** Have the owner try automatic fire and enemy hits on device, tune values if needed, and choose the next gameplay feature.

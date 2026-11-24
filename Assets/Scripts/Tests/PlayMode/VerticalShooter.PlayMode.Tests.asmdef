@@ -1,5 +1,5 @@
 {
     "name": "VerticalShooter.PlayMode.Tests",
-    "references": ["VerticalShooter.Runtime", "Unity.Localization", "Unity.ResourceManager"],
+    "references": ["VerticalShooter.Runtime", "Unity.Localization", "Unity.ResourceManager", "Unity.InputSystem"],
     "optionalUnityReferences": ["TestAssemblies"]
 }
