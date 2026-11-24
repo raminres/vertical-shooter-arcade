@@ -1,5 +1,7 @@
 {
   "name": "VerticalShooter.Runtime",
-  "references": ["Unity.Localization", "Unity.ResourceManager", "Unity.InputSystem"],
+  "references": ["Unity.Localization", "Unity.ResourceManager", "Unity.InputSystem", "RichHaptic.Runtime"],
+  "overrideReferences": true,
+  "precompiledReferences": ["DOTween.dll"],
   "autoReferenced": true
 }

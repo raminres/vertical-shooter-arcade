@@ -10,7 +10,11 @@ namespace VerticalShooter.Tests
     {
         private static bool IsProjectAsset(string path) =>
             path.StartsWith("Assets/") && !path.StartsWith("Assets/Plugins/") &&
-            !path.StartsWith("Assets/TutorialInfo/");
+            !path.StartsWith("Assets/TutorialInfo/") &&
+            !(path.StartsWith("Assets/Screenshots/") &&
+              (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) ||
+               path.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
+               path.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase)));
 
         [TestCase("Prefab", ".prefab", "PF_")]
         [TestCase("Texture2D", "", "TX_")]

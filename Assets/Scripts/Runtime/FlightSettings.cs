@@ -9,6 +9,11 @@ namespace VerticalShooter.Gameplay
         [Min(0f)] public float playerSpeed = 6f;
         [Min(0f)] public float touchSensitivity = 1f;
         [Min(0f)] public float bankAngle = 18f;
+        [Min(0.01f)] public float touchBankFullSpeed = .5f;
+        [Min(0.01f)] public float bankTweenDuration = .15f;
+        [Min(0f)] public float cameraMovementZoom = 1.5f;
+        [Min(0.01f)] public float cameraTweenDuration = .25f;
+        [Min(0.01f)] public float enemyHitTweenDuration = .12f;
         [Min(0f)] public float playerHalfWidth = 1f;
         [Min(0f)] public float playerHalfLength = 1f;
         [Min(1)] public int lightFighterHitPoints = 2;

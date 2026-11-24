@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -40,6 +41,8 @@ namespace VerticalShooter.Tests
             yield return SceneManager.LoadSceneAsync("Gameplay");
             yield return null;
             var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            // Keep automatic fire away from the center lane while checking health on reuse.
+            flight.Aircraft.position += Vector3.right * 20f;
             for (int step = 0; step < 100 && flight.ActiveEnemies == 0; step++)
                 flight.Simulate(.02f, Vector2.zero, Vector2.zero);
             int index = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
@@ -53,6 +56,59 @@ namespace VerticalShooter.Tests
                 flight.Simulate(.02f, Vector2.zero, Vector2.zero);
             Assert.That(flight.GetEnemyGeneration(index), Is.GreaterThan(generation));
             Assert.That(flight.GetEnemyHealth(index), Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator ValidHitsAndKillsEmitDistinctFeedbackEvents()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            var hits = new List<bool>();
+            flight.EnemyHit += hits.Add;
+            for (int step = 0; step < 100 && flight.ActiveEnemies == 0; step++)
+                flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            int index = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
+            Assert.That(flight.DamageEnemy(index, 0), Is.False);
+            Assert.That(flight.DamageEnemy(-1, 1), Is.False);
+            Assert.That(hits, Is.Empty);
+            Assert.That(flight.DamageEnemy(index, 1), Is.False);
+            Assert.That(flight.DamageEnemy(index, 1), Is.True);
+            Assert.That(flight.DamageEnemy(index, 1), Is.False);
+            Assert.That(hits, Is.EqualTo(new[] { false, true }));
+        }
+
+        [UnityTest]
+        public IEnumerator PlaneCameraAndEnemyTweensMoveAndReturnToRest()
+        {
+            yield return SceneManager.LoadSceneAsync("Gameplay");
+            yield return null;
+            var flight = Object.FindAnyObjectByType<PrototypeFlight>();
+            var camera = flight.FlightCamera;
+            var plane = flight.Aircraft.Find("Visual");
+            float initialFov = camera.fieldOfView;
+            Quaternion initialRotation = plane.localRotation;
+            int initialObjects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length;
+            flight.Simulate(.02f, Vector2.right, Vector2.zero);
+            Assert.That(camera.fieldOfView, Is.GreaterThan(initialFov));
+            Assert.That(camera.fieldOfView, Is.LessThan(initialFov + 1.5f));
+            Assert.That(Quaternion.Angle(initialRotation, plane.localRotation), Is.GreaterThan(0f));
+            for (int i = 0; i < 25; i++) flight.Simulate(.02f, Vector2.right, Vector2.zero);
+            Assert.That(camera.fieldOfView, Is.EqualTo(initialFov + 1.5f).Within(.01f));
+            for (int i = 0; i < 25; i++) flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            Assert.That(camera.fieldOfView, Is.EqualTo(initialFov).Within(.01f));
+            Assert.That(Quaternion.Angle(initialRotation, plane.localRotation), Is.LessThan(.01f));
+            for (int i = 0; i < 100 && flight.ActiveEnemies == 0; i++) flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            int index = Enumerable.Range(0, flight.Capacity).First(i => flight.GetEnemy(i).gameObject.activeSelf);
+            var enemy = flight.GetEnemy(index);
+            var baseScale = enemy.localScale;
+            flight.DamageEnemy(index, 1);
+            Assert.That(enemy.localScale.x, Is.EqualTo(baseScale.x * .8f).Within(.001f));
+            flight.Simulate(.03f, Vector2.zero, Vector2.zero);
+            Assert.That(enemy.localScale.x, Is.GreaterThan(baseScale.x * .8f));
+            for (int i = 0; i < 10; i++) flight.Simulate(.02f, Vector2.zero, Vector2.zero);
+            Assert.That(enemy.localScale.x, Is.EqualTo(baseScale.x).Within(.001f));
+            Assert.That(Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(initialObjects));
         }
 
         [UnityTest]

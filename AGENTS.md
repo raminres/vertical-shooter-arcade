@@ -46,12 +46,13 @@ At the **end of every session**:
 - Check the actual CLI exit status **and** test report; do not treat a command launch or an empty result as success.
 - For visual, import, or interaction changes, additionally inspect the result in the Editor or a playable build. Automated tests do not replace required visual and device checks.
 - If an Editor, device, platform toolchain, or test runner is unavailable, report **not verified / blocked**, with the reason. Do not mark the change complete or fabricate passing results.
-- After changes touching platform behavior, verify a Windows/PC build and an iOS build at suitable milestones. Test touch input and portrait layouts on real iOS hardware when available; report clearly if only Editor simulation was checked.
+- Build Windows/PC and iOS at suitable platform or release milestones, after platform-specific changes, or when the owner requests builds; do not build both platforms for every change. Editor-only Simulator profile changes do not require player builds. Test touch input and portrait layouts on real iOS hardware when available; report clearly if only Editor simulation was checked.
 
 ## 4. Prefab-only game objects; no runtime object creation
 
 - **Every in-game GameObject must be authored as a prefab asset in the project.** Place prefab instances into scenes or prefab-based, editor-prepared pools before entering Play Mode.
 - **Do not create GameObjects or components at runtime.** No `new GameObject(...)`, `Object.Instantiate(...)`, runtime `AddComponent(...)`, or equivalent dynamic GameObject creation for gameplay.
+- **Owner-approved exception:** RichHaptic creates one hidden iOS lifecycle helper GameObject at startup. This exception is limited to that package helper; gameplay objects and other runtime GameObjects must still follow the prefab-only rule.
 - Enemies, bullets, pickups, impact effects, and other reusable objects must use **preallocated, prefab-authored pools**. At runtime activate/deactivate and reposition existing instances instead of creating/destroying them. Establish and document pool capacities and exhaustion behavior.
 - Do not use runtime `Destroy` as the normal lifecycle for pooled objects.
 - UI Toolkit `VisualElement` instances and UXML visual trees are **UI data, not gameplay GameObjects**; use documented UI Toolkit lifecycle APIs while keeping all actual gameplay GameObjects prefab-authored.
@@ -126,7 +127,7 @@ Assets/
 ```
 
 - Name all new project-owned assets using these case-sensitive prefixes: **`PF_`** prefab, **`MT_`** base material, **`MI_`** material variant or intentionally derived material instance, **`TX_`** texture, **`SM_`** static mesh/model, **`SK_`** skinned mesh/model, and **`AU_`** audio clip. For an imported model containing skinned meshes use `SK_`; use `SM_` for a static-only model. Imported mesh subassets are named by their source model; do not break model imports to rename them. Unity material variants with a parent must use `MI_`.
-- Apply prefixes to asset filenames while preserving `.meta` GUIDs via Unity's asset move/rename APIs. Preserve vendor-managed assets under `Assets/Plugins` and Unity tutorial assets under `Assets/TutorialInfo` without renaming them. Run `AssetNamingTests` and the required full suites to catch violations; project-owned assets belong in the designated folders.
+- Apply prefixes to asset filenames while preserving `.meta` GUIDs via Unity's asset move/rename APIs. Preserve vendor-managed assets under `Assets/Plugins` and Unity tutorial assets under `Assets/TutorialInfo`, and owner-provided reference screenshots under `Assets/Screenshots` without renaming them. Run `AssetNamingTests` and the required full suites to catch violations; project-owned assets belong in the designated folders.
 - Create and maintain **Unity Preset assets** for imported textures, UI icons/sprites, audio, and FBX/model assets; use separate presets for materially different categories (for example UI icons vs world textures, SFX vs music).
 - Configure **Preset Manager importer filters** or a documented, tested folder-based preset application workflow so the correct preset is applied based on the intended asset folder. Merely storing `.preset` files in folders is not assumed to auto-apply them.
 - Preset Manager applies the presets in `Assets/Settings/Presets` to new assets under `Assets/Art/Textures`, `Assets/UI/Icons`, `Assets/Audio/SFX`, `Assets/Audio/Music`, and `Assets/Art/Models` using folder glob filters. To apply updated defaults to an existing asset, use Reset in the importer's Inspector context menu. Reset replaces the asset's importer settings with the applicable defaults.
@@ -175,42 +176,42 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — iOS and Windows build profiles
+### 2026-11-24 — Device Simulator rounded corners
 
-- **Completed:** Created iOS and Windows 64-bit Player Build Profiles in `Assets/Settings/Build Profiles`; both inherit the shared scene list and Player Settings. Neither profile was activated, and Player Settings remained byte-for-byte unchanged.
-- **Files/systems changed:** Build Profile assets and metadata; Edit Mode configuration checks; this handoff.
-- **Verification:** Unity compiled, the Build Profiles window lists both profiles, and an iOS profile dry run resolved MainMenu and Gameplay in order. All 25 Edit Mode and Play Mode tests passed on the second run; the first run failed two existing UI animation tests, indicating intermittent behavior. Console ended without current errors or warnings.
-- **Untested:** No new iOS or Windows builds or device checks were run; the Windows profile was not activated or build-validated.
-- **Next:** Switch to the desired profile in File > Build Profiles and build; investigate the intermittent UI animation tests if they recur. The custom iOS build tool remains the path that increments version and build numbers.
+- **Completed:** Added transparent rounded-corner overlays and `presentation` data to the custom iPhone 15 and iPad mini 6 simulator profiles. Their corner radii are visual estimates (165 and 43 pixels); resolution, safe areas, and device system data remain unchanged. Updated build guidance: full platform builds are for appropriate milestones or platform-specific work, not every change.
+- **Files/systems changed:** Both `.device` profiles, two `TX_` overlay PNGs with metadata, Edit Mode presentation checks, and this handoff. Player Settings remained unchanged.
+- **Verification:** Inspected both rounded profiles in the Simulator, verified each profile's simulated resolution and safe area in Play Mode, and confirmed the underlying screen and system data match the previous versions. All 43 Edit Mode and Play Mode tests passed; no new console errors.
+- **Untested:** No iOS or Windows builds were run for this Editor-only change; corner radii remain approximate visual representations.
+- **Next:** Continue gameplay work and build for the target platforms at the next appropriate milestone or when requested.
 
-### 2026-11-24 — Documentation and handoff refresh
+### 2026-11-24 — Enemy haptics and DOTween easing
 
-- **Completed:** Updated README and GDD to distinguish the prototype scenes and menus from planned gameplay, and documented localization, device layouts, build profiles, and the custom iOS build tool. Refreshed this file's project baseline and rolling handoff.
-- **Files/systems changed:** `README.md`, `GDD.md`, and `AGENTS.md` only. The project was on `feature/scene-menu-foundation` with a clean working tree before these edits.
-- **Verification:** Compared the documents with the current scenes, UI, localization settings, build profiles, project configuration, Git history, and prior test results. The connected Unity Editor reported ready. No tests or builds were run for this documentation-only session.
-- **Open:** Physical iPhone 15/iPad mini 6 layout and touch checks, new profile-based Windows/iOS builds, and an export through the custom iOS tool remain unverified. Two existing UI animation tests failed intermittently on the first run in the previous session, then all 25 tests passed. DOTween's runtime GameObject conflicts with the prefab-only rule.
-- **Next:** Ask the owner which gameplay feature to prototype next; no specific next feature has been approved. Before implementing it, review the GDD and current branch, preserve Player Settings, and run the required tests.
+- **Completed:** Added RichHaptic LightImpact on non-lethal enemy hits and MediumImpact on kills, and DOTween-eased plane banking, subtle camera movement zoom and enemy hit recovery. Motion settings are in `Assets/Data/PrototypeFlightSettings.asset`. The owner explicitly allowed RichHaptic's single hidden iOS lifecycle GameObject as the limited exception recorded in section 4. DOTween is used only for easing calculations; its runtime manager is not started. Prior uncommitted Simulator profile changes were retained.
+- **Files/systems changed:** Runtime combat/flight code, haptic feedback adapter, runtime assembly references, flight settings, Edit/Play Mode tests, README, GDD and this handoff.
+- **Verification:** All 46 Edit Mode and Play Mode tests passed, including impact preset selection, hit/kill events, animation progress and settling, and unchanged scene GameObject count. Inspected plane banking and camera FOV in the Simulator. The iOS Xcode export succeeded with the same four existing localization/TextMesh Pro warnings; Player Settings and unrelated graphics reserialization were restored. No new console errors.
+- **Untested:** Haptic feel on physical iPhone, Xcode compilation/signing, and a new Windows build were not checked. Apple documents that iPad lacks Core Haptics support, so feedback is silently skipped there.
+- **Next:** Test the short hit/kill taps and movement feel on iPhone; tune motion settings or haptic presets based on the owner's feedback.
 
-### 2026-11-24 — Flight and enemy movement prototype
+### 2026-11-24 — Touch aircraft banking
 
-- **Completed:** Extended Gameplay with a forward-moving perspective camera, three looping prefab-authored ground sections, a placeholder plane using keyboard and touch-drag input, and three preallocated Light Fighters in repeating straight/diagonal groups. The pool waits for a slot when full and reuses enemies after they leave the view; no runtime gameplay GameObjects are created. Tunable values are in `Assets/Data/PrototypeFlightSettings.asset`. Updated README and GDD.
-- **Files/systems changed:** Gameplay scene; player, enemy, ground and flight-rig prefabs; prototype materials; flight settings and runtime scripts; Input System assembly references; Play Mode tests. The owner reports the earlier UI looked good on iPhone 15 and iPad mini 6.
-- **Verification:** Unity compiled; all 29 Edit Mode and Play Mode tests passed after final changes, covering keyboard and simulated touch, bounds on both target aspect ratios, pool reuse, and pause. Inspected gameplay in iPhone 15 and iPad mini simulator profiles. An iOS Xcode export and Windows build succeeded. The iOS report contained four existing localization/TextMesh Pro warnings; the Windows report contained six URP shadow-array warnings after switching targets. An initial Windows build was interrupted during target reload; the retry succeeded. Restored the iOS target, original Player Settings hash, and unrelated build-generated graphics changes.
-- **Untested:** The new flight controls and gameplay framing have not been tested on physical devices; the Xcode project has not been compiled or signed. No shooting, collisions, damage, enemy attacks or full wave system has been implemented.
-- **Next:** Have the owner try the new flight controls and camera on iPhone and iPad, tune movement via the settings asset, then agree on the next feature such as automatic fire and enemy hits.
+- **Completed:** Changed touch banking to use swipe speed instead of per-frame distance, keeping the plane's roll consistent across frame rates. Keyboard banking and camera zoom retain their existing behavior. Added `touchBankFullSpeed` to `Assets/Data/PrototypeFlightSettings.asset` (screen widths per second for full bank).
+- **Files/systems changed:** `PrototypeFlight`, `FlightSettings`, the flight settings asset, Play Mode banking regression test, and this handoff. Existing uncommitted haptic and Simulator work was retained.
+- **Verification:** The new regression reproduced the weak roll before the fix and passed afterward for left/right swipes at 30 and 60 FPS. Inspected the banked plane in the iPhone Simulator. All 31 Edit Mode and 16 Play Mode tests passed in separate runs; earlier attempts encountered the existing intermittent UI animation tests and a Unity Test Runner scene-restoration error. No new errors appeared after recovery. Player Settings stayed unchanged.
+- **Untested:** Real-device touch banking; no player builds were made for this change.
+- **Next:** Ask the owner to try side-to-side touch movement on the iPhone/iPad and tune `touchBankFullSpeed` or `bankAngle` if needed.
 
-### 2026-11-24 — Asset naming convention
+### 2026-11-24 — Gameplay lighting and post-processing
 
-- **Completed:** Renamed project-owned prefab and material assets to `PF_` and `MT_` using Unity's asset database; preserved all 13 GUIDs. Recorded `PF_`, `MT_`, `MI_`, `TX_`, `SM_`, `SK_`, and `AU_` naming rules and vendor exceptions above. Added Edit Mode checks for naming, imported models and material variants.
-- **Files/systems changed:** Prefab and material asset names and metadata; `AssetNamingTests`; this handoff. Prior uncommitted flight work was retained.
-- **Verification:** Unity confirmed zero GUID mismatches and no missing Gameplay dependencies; the renamed gameplay scene was inspected in Play Mode. The full 34-test Edit/Play Mode run passed on retry; the first run failed the previously intermittent button-animation test.
-- **Untested:** No new platform builds or physical-device checks were run for these asset renames.
-- **Next:** Continue the flight prototype after the owner tests movement and framing; enforce the naming rules for all new project-owned assets.
+- **Completed:** Added a prefab-authored warm directional sun and sky/ground ambient gradient to Gameplay, increased prototype material color contrast, and enabled a gameplay-only URP volume with bloom, low-quality camera-only motion blur, color adjustments and neutral tonemapping. Settings are in `Assets/Settings/GameplayDaylightProfile.asset`; the lighting prefab is `Assets/Prefabs/Environment/PF_GameplayLighting.prefab`.
+- **Files/systems changed:** Gameplay scene and camera rig prefab, prototype materials, new lighting prefab and volume profile, Edit Mode configuration tests and assembly references, README, GDD, and this handoff. Existing uncommitted touch, haptic and simulator work was retained. Player Settings and render-pipeline project assets remained unchanged.
+- **Verification:** All 51 Edit Mode and Play Mode tests passed. Inspected the iPhone and iPad Simulator previews, confirmed HDR and active volume settings, and compared the same paused frame with the volume on and off. A transient player-position NaN occurred once while opening Simulator before the lighting changes; no subsequent errors were observed.
+- **Untested:** Physical-device appearance, motion-blur visibility and performance; no new platform builds were run.
+- **Next:** Review the lighting and subtle effects on the owner's iPhone and iPad; tune or disable effects as needed for visual clarity and mobile performance.
 
-### 2026-11-24 — Automatic fire and light-fighter hits
+### 2026-11-24 — Reference camera framing
 
-- **Completed:** Added automatic straight shots, a 16-instance prefab-authored projectile pool, swept hit detection against moving light fighters, two-hit health with a brief non-lethal hit reaction, enemy reuse/health reset, and pause support. When the projectile pool is full, a shot is skipped until the next interval. Fire rate, speed, radii, damage and enemy health are tunable in `Assets/Data/PrototypeFlightSettings.asset`. Updated README and GDD.
-- **Files/systems changed:** Flight and combat scripts/configuration, `PF_PrototypeFlightRig` and new `PF_PrototypeProjectile`/`MT_PrototypeProjectile` assets, Edit Mode and Play Mode tests, docs and this handoff. Existing uncommitted changes were retained.
-- **Verification:** All 41 Edit Mode and Play Mode tests passed after the final changes, covering swept collisions, actual hits and defeat, enemy reuse/health reset, projectile pool exhaustion/reuse and pausing. Inspected shots in iPhone 15 and iPad mini simulator profiles. Windows build and iOS Xcode export succeeded with the previously seen six URP shadow-array and four localization/TextMesh Pro warnings, respectively. A transient NullReference during the intermediate unwired prefab state was resolved when the prefab was wired; no subsequent captured errors. Restored iOS target, original Player Settings hash and unrelated build-generated graphics changes.
-- **Untested:** Physical-device combat and Xcode compilation/signing. Enemy attacks, player damage, special weapons and full waves are not implemented.
-- **Next:** Have the owner try automatic fire and enemy hits on device, tune values if needed, and choose the next gameplay feature.
+- **Implemented:** Tilted and repositioned the gameplay camera, scaled the player and pooled enemies, adjusted the enemy hit radius and perspective-aware movement bounds. Preserved the owner's reference screenshots and exempted those reference images from runtime asset naming checks.
+- **Files/systems changed:** Gameplay rig prefab, flight settings and movement, flight/combat and naming tests, this handoff. Existing uncommitted changes were retained.
+- **Verification:** Inspected the iPhone 15 and iPad mini 6 Simulator views. All 17 Play Mode tests passed. Edit Mode: 34/35 passed; `GameplayLightingTests.GameplayCameraAndProfileEnableRequestedEffects` expects camera-only motion blur, while the existing profile is set to camera-and-objects. This pre-existing settings/test mismatch was left unchanged.
+- **Untested / incomplete:** Physical-device framing and performance; no platform builds. The mandatory full test gate remains unmet until the lighting settings/test mismatch is resolved.
+- **Next:** Decide whether the current motion-blur mode is intentional, reconcile its test, rerun both suites, and review framing on iPhone and iPad.

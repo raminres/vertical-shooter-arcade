@@ -1,3 +1,4 @@
+using RichHaptic;
 using UnityEngine;
 
 namespace VerticalShooter.Gameplay
@@ -13,17 +14,25 @@ namespace VerticalShooter.Gameplay
         private int[] enemyGeneration;
         private bool[] enemyWasActive;
         private float fireTimer;
+        private EnemyHapticFeedback hapticFeedback;
         public int ProjectileCapacity => projectiles.Length;
         public int ActiveProjectiles { get; private set; }
 
         private void OnEnable()
         {
+            hapticFeedback = new EnemyHapticFeedback(Haptics.PlayPreset);
+            flight.EnemyHit += hapticFeedback.OnEnemyHit;
             enemyPrevious = new Vector3[flight.Capacity];
             enemyGeneration = new int[flight.Capacity];
             enemyWasActive = new bool[flight.Capacity];
             foreach (var projectile in projectiles) projectile.gameObject.SetActive(false);
             ActiveProjectiles = 0;
             fireTimer = 0f;
+        }
+
+        private void OnDisable()
+        {
+            if (hapticFeedback != null) flight.EnemyHit -= hapticFeedback.OnEnemyHit;
         }
 
         public void CaptureEnemies()

@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Screen = UnityEngine.Device.Screen;
@@ -22,11 +23,16 @@ namespace VerticalShooter.Gameplay
         private Vector3[] enemyBaseScales;
         private float[] enemyHitTimers;
         public event Action EnemyDefeated;
+        public event Action<bool> EnemyHit;
         private int group;
         private int spawned;
         private float timer;
         private bool dragging;
         private Vector2 previousTouch;
+        private Quaternion visualRestRotation;
+        private float baseFieldOfView;
+        private float bankStart, bankTarget, bankValue, bankElapsed;
+        private float cameraStart, cameraTarget, cameraElapsed;
         public int Capacity => enemies.Length;
         public Transform GetEnemy(int index) => enemies[index];
         public int GetEnemyHealth(int index) => enemyHealth[index];
@@ -52,6 +58,17 @@ namespace VerticalShooter.Gameplay
             spawned = 0;
             timer = settings.groupInterval;
             dragging = false;
+            visualRestRotation = visual.localRotation;
+            baseFieldOfView = flightCamera.fieldOfView;
+            bankStart = bankTarget = bankValue = 0f;
+            cameraStart = cameraTarget = baseFieldOfView;
+            bankElapsed = cameraElapsed = 0f;
+        }
+
+        private void OnDisable()
+        {
+            if (flightCamera != null) flightCamera.fieldOfView = baseFieldOfView;
+            if (visual != null) visual.localRotation = visualRestRotation;
         }
 
         private void Update()
@@ -96,20 +113,52 @@ namespace VerticalShooter.Gameplay
                 if (tile.localPosition.z < -groundLength)
                     tile.localPosition += Vector3.forward * (groundLength * groundSections.Length);
             }
-            var lower = PointOnPlane(new Vector2(0.06f, 0.13f), aircraft.position.y);
-            var upper = PointOnPlane(new Vector2(0.94f, 0.84f), aircraft.position.y);
+            float touchBank = drag.x / (deltaTime * Mathf.Max(.01f, settings.touchBankFullSpeed));
+            float bankInput = Mathf.Clamp(move.x + touchBank, -1f, 1f);
+            float cameraInput = Mathf.Clamp(move.x + drag.x * 20f, -1f, 1f);
+            ApplyMotionTweens(deltaTime, bankInput, cameraInput);
+            var lower = PointOnPlane(new Vector2(0.5f, 0.13f), aircraft.position.y);
+            var upper = PointOnPlane(new Vector2(0.5f, 0.84f), aircraft.position.y);
             Vector3 position = aircraft.position;
-            position.x += move.x * settings.playerSpeed * deltaTime + drag.x * (upper.x - lower.x) * settings.touchSensitivity;
             position.z += move.y * settings.playerSpeed * deltaTime + drag.y * (upper.z - lower.z) * settings.touchSensitivity;
-            float halfWidth = Mathf.Min(settings.playerHalfWidth, (upper.x - lower.x) * 0.5f);
             float halfLength = Mathf.Min(settings.playerHalfLength, (upper.z - lower.z) * 0.5f);
-            position.x = Mathf.Clamp(position.x, lower.x + halfWidth, upper.x - halfWidth);
             position.z = Mathf.Clamp(position.z, lower.z + halfLength, upper.z - halfLength);
+            // The near edge is narrower when the camera is tilted, so constrain both wings there.
+            float nearViewportY = flightCamera.WorldToViewportPoint(new Vector3(position.x, position.y, position.z - halfLength)).y;
+            var left = PointOnPlane(new Vector2(0.06f, nearViewportY), position.y);
+            var right = PointOnPlane(new Vector2(0.94f, nearViewportY), position.y);
+            position.x += move.x * settings.playerSpeed * deltaTime + drag.x * (right.x - left.x) * settings.touchSensitivity;
+            float halfWidth = Mathf.Min(settings.playerHalfWidth, (right.x - left.x) * 0.5f);
+            position.x = Mathf.Clamp(position.x, left.x + halfWidth, right.x - halfWidth);
             aircraft.position = position;
-            float bankInput = Mathf.Clamp(move.x + drag.x * 20f, -1f, 1f);
-            visual.localRotation = Quaternion.Slerp(visual.localRotation, Quaternion.Euler(0f, 0f, -bankInput * settings.bankAngle), 1f - Mathf.Exp(-10f * deltaTime));
             TickEnemies(deltaTime);
             combat.Simulate(deltaTime);
+        }
+
+        private void ApplyMotionTweens(float deltaTime, float bankInput, float cameraInput)
+        {
+            float desiredBank = -bankInput * settings.bankAngle;
+            if (!Mathf.Approximately(desiredBank, bankTarget))
+            {
+                bankStart = bankValue;
+                bankTarget = desiredBank;
+                bankElapsed = 0f;
+            }
+            bankElapsed += deltaTime;
+            float bankProgress = Mathf.Clamp01(bankElapsed / Mathf.Max(.01f, settings.bankTweenDuration));
+            bankValue = DOVirtual.EasedValue(bankStart, bankTarget, bankProgress, Ease.OutCubic);
+            visual.localRotation = visualRestRotation * Quaternion.Euler(0f, 0f, bankValue);
+
+            float desiredFov = baseFieldOfView + Mathf.Abs(cameraInput) * settings.cameraMovementZoom;
+            if (!Mathf.Approximately(desiredFov, cameraTarget))
+            {
+                cameraStart = flightCamera.fieldOfView;
+                cameraTarget = desiredFov;
+                cameraElapsed = 0f;
+            }
+            cameraElapsed += deltaTime;
+            float cameraProgress = Mathf.Clamp01(cameraElapsed / Mathf.Max(.01f, settings.cameraTweenDuration));
+            flightCamera.fieldOfView = DOVirtual.EasedValue(cameraStart, cameraTarget, cameraProgress, Ease.OutCubic);
         }
 
         private Vector3 PointOnPlane(Vector2 viewport, float height)
@@ -126,12 +175,14 @@ namespace VerticalShooter.Gameplay
             enemyHealth[index] = Mathf.Max(0, enemyHealth[index] - damage);
             if (enemyHealth[index] > 0)
             {
-                enemyHitTimers[index] = .12f;
+                enemyHitTimers[index] = Mathf.Max(.01f, settings.enemyHitTweenDuration);
                 enemies[index].localScale = enemyBaseScales[index] * .8f;
+                EnemyHit?.Invoke(false);
                 return false;
             }
             enemies[index].gameObject.SetActive(false);
             ActiveEnemies--;
+            EnemyHit?.Invoke(true);
             EnemyDefeated?.Invoke();
             return true;
         }
@@ -145,6 +196,9 @@ namespace VerticalShooter.Gameplay
                 if (enemyHitTimers[i] > 0f)
                 {
                     enemyHitTimers[i] -= deltaTime;
+                    float progress = 1f - Mathf.Clamp01(enemyHitTimers[i] / Mathf.Max(.01f, settings.enemyHitTweenDuration));
+                    float scale = DOVirtual.EasedValue(.8f, 1f, progress, Ease.OutBack);
+                    enemies[i].localScale = enemyBaseScales[i] * scale;
                     if (enemyHitTimers[i] <= 0f) enemies[i].localScale = enemyBaseScales[i];
                 }
                 enemies[i].position += enemyDirections[i] * (settings.enemySpeed * deltaTime);
