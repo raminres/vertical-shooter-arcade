@@ -1,43 +1,45 @@
 # Vertical Shooter Arcade
 
-A 3D vertical-scrolling arcade shooter in development with Unity. The project is a personal technical-art portfolio piece, combining WWII-inspired aircraft and environments with a colorful mobile presentation.
+A 3D vertical-scrolling arcade shooter in development with Unity. This personal technical-art portfolio project combines WWII-inspired aircraft and environments with a colorful mobile presentation.
 
-The game targets portrait play on Windows and iOS. It uses a top-down perspective camera with movement on a two-dimensional playfield.
+The game targets portrait play on Windows and iOS, using a perspective camera and a two-dimensional playfield.
 
 ## Project status
 
-The project is in the **pre-prototype** stage. The repository currently contains a sample scene and the project setup for input, localization, asset imports, testing, and iOS builds. Gameplay systems and levels are planned.
+The project has a **prototype menu and basic flight scene**. `MainMenu` contains New Game, Continue, Options, and Credits; New Game offers a choice of focused laser, spread barrage, or homing missiles before opening `Gameplay`. The gameplay scene has a placeholder environment and HUD, plus a pause menu with Resume, Options, and Main Menu. Continue is disabled until its underlying system exists. The health and special-charge HUD reflect the current run; stars are placeholders. The gameplay scene has a forward-scrolling camera and ground, a keyboard- or touch-controlled placeholder aircraft, and an eight-fighter pool following straight and diagonal paths, with up to eight enemies per group. The plane automatically fires straight shots, and light fighters are defeated after two hits. Enemy defeats produce orange particle bursts, and player damage produces cyan bursts; hits and kills also trigger short haptic taps on supported devices; the plane, enemy hit reactions, and camera use DOTween easing. Light fighters fire straight red projectiles. Hits remove one health point and grant one second of invulnerability; at zero health, the player can retry or return to the menu. The enemy projectile pool has 12 slots and skips a shot when full. The selected special starts with two charges; primary fire continues while it is active. Specials use one pre-authored laser and a 14-shot pool, and a blocked activation does not consume a charge. The laser is cyan and the special projectiles are green, using URP Unlit materials. Weapon values are provisional in `Assets/Data/Weapons/SpecialWeaponSettings.asset`. Enemy shot timing and damage are prototype tuning values. Special-ammo drops, shields, progression, and levels remain to be implemented.
 
-The design aims for a ten-level campaign with two boss encounters, automatic primary fire, selectable special weapons, enemy formations, and persistent upgrades. See the [game design document](GDD.md) for the current design and open questions.
+The design aims for a ten-level campaign with two boss encounters, automatic primary fire, selectable special weapons, enemy formations, and persistent upgrades. See the [game design document](GDD.md) for the agreed design, open questions, and current implementation status.
 
 ## Getting started
 
-1. Install **Unity 6000.6.10f1** through Unity Hub. Add Windows and iOS Build Support if you plan to build for those platforms.
-2. Clone this repository and add its root folder to Unity Hub.
-3. Open the project with the specified Editor version and allow Unity to resolve its packages. Git and network access are needed to resolve the RichHaptic Git dependency.
-4. Open `Assets/Scenes/SampleScene.unity` to inspect the current scene.
+1. Install **Unity 6000.6.10f1** through Unity Hub. Add Windows and iOS Build Support to build for those platforms.
+2. Clone the repository and add its root folder to Unity Hub.
+3. Open the project with that Editor version and allow Unity to resolve its packages. Git and network access are needed for the RichHaptic Git dependency.
+4. Open `Assets/Scenes/MainMenu.unity` and enter Play Mode. `MainMenu` and `Gameplay` are the enabled scenes in the shared build scene list, in that order.
 
 ## Project setup
 
-- **Rendering:** Universal Render Pipeline.
-- **Input and UI:** Unity Input System and UI Toolkit.
-- **Localization:** English and Turkish locales, with UI string and asset table collections ready to populate.
-- **Tweening and haptics:** DOTween and RichHaptic are installed. DOTween's Editor utility is disabled and its optional modules are not configured. Its runtime manager creates a GameObject, which needs to be reconciled with the project's prefab-only rules before gameplay use.
-- **Asset imports:** Preset Manager has folder filters for world textures, UI icons, models, sound effects, and music.
+- **Rendering, input, and UI:** Universal Render Pipeline, the new Unity Input System, and UI Toolkit. Gameplay uses a warm directional light, sky-colored ambient fill, and a tunable post-processing profile with subtle bloom and camera motion blur. Buttons have mouse-hover and press transitions; simulated touch uses press feedback.
+- **Localization:** English and Turkish UI strings are available. English is the default, and Options can switch languages during a session. No persistent language preference is currently implemented.
+- **Portrait layout:** The UI reference resolution is 1179 × 2556 (iPhone 15). Custom Device Simulator profiles are available for iPhone 15 and iPad mini 6; the iPad safe-area insets are estimates. The owner has checked the UI on a physical iPhone 15 and iPad mini 6; the new gameplay controls and framing still need device testing. Device Simulator simulates touch; use Game view to check mouse hover.
+- **Tweening and haptics:** DOTween and RichHaptic are installed. DOTween's Editor utility is disabled and its optional modules are not configured. Its standard runtime manager creates a GameObject, which conflicts with the project's prefab-only rules and must be resolved before using it for gameplay; current motion uses DOTween easing without that manager. The owner approved RichHaptic's single hidden iOS lifecycle helper as an exception. Haptic feedback has not yet been verified on an iOS device.
+- **Asset imports:** Preset Manager folder filters cover world textures, UI icons, models, sound effects, and music. Existing imports need an importer Reset to apply updated defaults.
 
-## iOS builds
+## Build profiles and iOS builds
 
-With iOS selected as the active build target, open **Tools → Build → iOS Build**. The window previews the next output folder, app version, and iOS build number. Starting a build creates a numbered folder such as `Builds/_build0` and saves the incremented patch version and build number to Player Settings. A failed build attempt also consumes those numbers.
+Open **File → Build Profiles** to select the **iOS** or **Windows** profile and switch to it before building. Both inherit the shared scene list and existing Player Settings. The profiles were created and the iOS configuration passed a dry run; new builds using the profiles have not yet been verified.
 
-Unity exports an Xcode project. Building and signing the final iOS app requires Xcode on macOS. The custom build tool has yet to be verified with an export, and haptic feedback has yet to be tested on an iOS device.
+For numbered iOS exports, select iOS as the active build target and open **Tools → Build → iOS Build**. Starting a build creates a folder such as `Builds/_build0` and saves an incremented patch version and iOS build number to Player Settings. A failed attempt also consumes those numbers. Building directly from a Build Profile does not use this tool's automatic numbering. The `Builds/` folder is ignored by Git.
+
+Unity exports an Xcode project; compiling and signing the final iOS app requires Xcode on macOS. An earlier iOS export succeeded, but the custom build tool itself has not yet been verified with an export.
 
 ## Tests
 
-Open **Window → General → Test Runner** in Unity and run the Edit Mode and Play Mode suites. With the [Unity CLI](https://docs.unity.com/en-us/unity-cli) installed and the project closed in the Editor, the suites can also be run from the project root:
+Open **Window → General → Test Runner** in Unity and run the Edit Mode and Play Mode suites. With the [Unity CLI](https://docs.unity.com/en-us/unity-cli) installed and the project closed in the Editor, run from the project root:
 
 ```sh
 unity test . --mode EditMode --output ./TestResults/editmode.xml
 unity test . --mode PlayMode --output ./TestResults/playmode.xml
 ```
 
-Project conventions and the latest development handoff are in [AGENTS.md](AGENTS.md).
+The latest Play Mode run passed all 29 tests on retry; a UI press-animation test failed intermittently on the first attempt. The latest Edit Mode run passed 36 of 37 tests. The remaining lighting test expects camera-only motion blur while the current profile uses camera-and-objects; this mismatch still needs to be resolved. Project conventions and the latest development handoff are in [AGENTS.md](AGENTS.md).

@@ -1,6 +1,6 @@
 {
     "name": "VerticalShooter.EditMode.Tests",
-    "references": ["Unity.Localization", "Unity.Localization.Editor", "VerticalShooter.Editor", "RichHaptic.Runtime"],
+    "references": ["Unity.Localization", "Unity.Localization.Editor", "VerticalShooter.Editor", "VerticalShooter.Runtime", "RichHaptic.Runtime", "Unity.RenderPipelines.Core.Runtime", "Unity.RenderPipelines.Universal.Runtime"],
     "includePlatforms": ["Editor"],
     "overrideReferences": true,
     "precompiledReferences": ["nunit.framework.dll", "DOTween.dll"],

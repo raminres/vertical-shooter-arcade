@@ -11,7 +11,9 @@
 - **Input:** Unity's **new Input System** (`com.unity.inputsystem`) exclusively; no new `UnityEngine.Input` / legacy Input Manager usage.
 - **UI:** **UI Toolkit** for runtime and Editor UI. Prefer UXML for structure, USS for styling, and C# for behavior.
 - **Tweening and haptics:** DOTween 1.3.045 is installed under `Assets/Plugins/Demigiant/DOTween` from the vendor download. RichHaptic 0.1.0 is installed via Unity Package Manager for iOS haptic feedback. Reference `RichHaptic.Runtime` from assemblies that use it. DOTween's standard tween runner creates a runtime GameObject, which conflicts with section 4; resolve that conflict with the owner before using the runner in gameplay. DOTween's Editor utility is disabled because it automatically changes Player Settings. Its optional modules are not configured. The plugin generated `Assets/Resources/DOTweenSettings.asset` as part of its installation.
-- **Player Settings:** Preserve the owner's Player Settings unless the owner explicitly requests a change.
+- **Player Settings:** Preserve the owner's Player Settings unless the owner explicitly requests a change. The iOS build tool intentionally increments version and build number when the owner starts a build through it.
+- **Build profiles:** `Assets/Settings/Build Profiles/iOS.asset` and `Windows.asset` inherit Player Settings and the shared MainMenu/Gameplay scene list. A build from the Build Profiles window does not invoke the custom iOS numbering tool.
+- **Current UI and localization:** MainMenu and Gameplay contain prototype menus, a placeholder HUD, and pause flow; Continue is disabled; New Game offers a special-weapon choice and the gameplay button consumes charges. English is the default; Turkish is selectable in Options. The UI reference is 1179 × 2556, with iPhone 15 and iPad mini 6 simulator profiles. The iPad simulator safe-area insets are estimates. The owner reports the earlier UI looks good on a physical iPhone 15 and iPad mini 6; the new gameplay controls and framing still need device checks. Device Simulator uses touch, so verify mouse hover in Game view.
 - **Design scope:** A small 3D vertical-scrolling shooter with movement constrained to a 2D playfield and a perspective camera. Follow the approved GDD when it is present; do not infer that an unapproved idea is a requirement.
 
 ## 2. Mandatory session workflow
@@ -44,12 +46,13 @@ At the **end of every session**:
 - Check the actual CLI exit status **and** test report; do not treat a command launch or an empty result as success.
 - For visual, import, or interaction changes, additionally inspect the result in the Editor or a playable build. Automated tests do not replace required visual and device checks.
 - If an Editor, device, platform toolchain, or test runner is unavailable, report **not verified / blocked**, with the reason. Do not mark the change complete or fabricate passing results.
-- After changes touching platform behavior, verify a Windows/PC build and an iOS build at suitable milestones. Test touch input and portrait layouts on real iOS hardware when available; report clearly if only Editor simulation was checked.
+- Build Windows/PC and iOS at suitable platform or release milestones, after platform-specific changes, or when the owner requests builds; do not build both platforms for every change. Editor-only Simulator profile changes do not require player builds. Test touch input and portrait layouts on real iOS hardware when available; report clearly if only Editor simulation was checked.
 
 ## 4. Prefab-only game objects; no runtime object creation
 
 - **Every in-game GameObject must be authored as a prefab asset in the project.** Place prefab instances into scenes or prefab-based, editor-prepared pools before entering Play Mode.
 - **Do not create GameObjects or components at runtime.** No `new GameObject(...)`, `Object.Instantiate(...)`, runtime `AddComponent(...)`, or equivalent dynamic GameObject creation for gameplay.
+- **Owner-approved exception:** RichHaptic creates one hidden iOS lifecycle helper GameObject at startup. This exception is limited to that package helper; gameplay objects and other runtime GameObjects must still follow the prefab-only rule.
 - Enemies, bullets, pickups, impact effects, and other reusable objects must use **preallocated, prefab-authored pools**. At runtime activate/deactivate and reposition existing instances instead of creating/destroying them. Establish and document pool capacities and exhaustion behavior.
 - Do not use runtime `Destroy` as the normal lifecycle for pooled objects.
 - UI Toolkit `VisualElement` instances and UXML visual trees are **UI data, not gameplay GameObjects**; use documented UI Toolkit lifecycle APIs while keeping all actual gameplay GameObjects prefab-authored.
@@ -123,6 +126,8 @@ Assets/
     Presets/
 ```
 
+- Name all new project-owned assets using these case-sensitive prefixes: **`PF_`** prefab, **`MT_`** base material, **`MI_`** material variant or intentionally derived material instance, **`TX_`** texture, **`SM_`** static mesh/model, **`SK_`** skinned mesh/model, and **`AU_`** audio clip. For an imported model containing skinned meshes use `SK_`; use `SM_` for a static-only model. Imported mesh subassets are named by their source model; do not break model imports to rename them. Unity material variants with a parent must use `MI_`.
+- Apply prefixes to asset filenames while preserving `.meta` GUIDs via Unity's asset move/rename APIs. Preserve vendor-managed assets under `Assets/Plugins` and Unity tutorial assets under `Assets/TutorialInfo`, and owner-provided reference screenshots under `Assets/Screenshots` without renaming them. Run `AssetNamingTests` and the required full suites to catch violations; project-owned assets belong in the designated folders.
 - Create and maintain **Unity Preset assets** for imported textures, UI icons/sprites, audio, and FBX/model assets; use separate presets for materially different categories (for example UI icons vs world textures, SFX vs music).
 - Configure **Preset Manager importer filters** or a documented, tested folder-based preset application workflow so the correct preset is applied based on the intended asset folder. Merely storing `.preset` files in folders is not assumed to auto-apply them.
 - Preset Manager applies the presets in `Assets/Settings/Presets` to new assets under `Assets/Art/Textures`, `Assets/UI/Icons`, `Assets/Audio/SFX`, `Assets/Audio/Music`, and `Assets/Art/Models` using folder glob filters. To apply updated defaults to an existing asset, use Reset in the importer's Inspector context menu. Reset replaces the asset's importer settings with the applicable defaults.
@@ -171,42 +176,43 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — Localization and importer setup
+### 2026-11-24 — Enemy fire and player health
 
-- **Completed:** Created English and Turkish locales, empty UI string and asset table collections, and five folder-based importer presets with an Editor postprocessor. Verified imports for world textures, UI icons, sound effects, music and models.
-- **Files/systems changed:** `Assets/Localization`, `Assets/AddressableAssetsData`, `Assets/Settings/Presets`, `Assets/Scripts/Editor`, and Edit Mode setup tests.
-- **Verification:** Both test suites passed, six tests total. The string completeness check is inconclusive because no UI strings exist yet. An Addressables content build invoked through Pipeline exceeded its 60-second timeout and may still be running. Final Editor state and content build remain unverified.
-- **Open:** The three supplied font files are imported but there is no runtime UI to style. Localization content build and device checks remain unverified.
-- **Next:** Inspect the Editor after the timed-out Addressables build, verify its outcome, and use the fonts and localized entries when UI is created.
+- **Implemented:** Light fighters fire straight shots from a 12-instance prefab-authored pool; shots are skipped when the pool is full. Swept hits remove 1 of 10 HP and grant 1 second of invulnerability. The HUD updates, and zero HP stops the run and opens a localized Retry/Main Menu panel. Enemy shot and health tuning are in `PrototypeFlightSettings`. Shields are not implemented.
+- **Files/systems changed:** Combat/flight and UI scripts, gameplay rig and scene, `PF_EnemyProjectile`, `MT_EnemyProjectile`, localized UI tables and UXML, Play Mode tests, README and GDD.
+- **Verification:** 21 Play Mode tests passed, covering automatic fire, hit damage and invulnerability, pool reuse, pause and retry. Inspected the shot in the iPhone Simulator and the failure panel in both iPhone 15 and iPad mini 6 Simulator profiles. Edit Mode: 34/35 passed; the existing lighting test still expects camera-only motion blur while the saved profile uses camera-and-objects.
+- **Untested / incomplete:** No real-device combat feel, performance or platform builds were checked. The mandatory full test gate remains unmet due to the existing lighting test mismatch.
+- **Next:** Reconcile the lighting test with the intended blur mode, rerun both suites, and playtest enemy shot readability, rate, and difficulty on device.
 
-### 2026-11-24 — Preset Manager folder filters
+### 2026-11-24 — More enemies and wider camera
 
-- **Completed:** Registered all five import presets in Preset Manager with folder glob filters and removed the redundant asset postprocessor.
-- **Files/systems changed:** `ProjectSettings/PresetManager.asset`, `Assets/Scripts/Editor`, and this handoff.
-- **Verification:** Fresh sample imports received the expected settings for all five categories. Both test suites passed, six tests total.
-- **Open:** Existing assets need an importer Reset to receive changed defaults. The earlier Addressables content build timed out and its outcome remains unverified.
-- **Next:** Add the first requested UI or gameplay feature and populate localization tables as text is designed.
+- **Implemented:** Expanded the prefab-authored fighter pool from 3 to 6, set groups to 6 with 0.5-second spacing, spread the opening group across three lanes, and increased the gameplay camera FOV from 55 to 60 degrees. If all slots are occupied, spawning waits for a slot; groups still wait for the previous group to clear. Group size and spawn timing are tunable in `PrototypeFlightSettings`. Existing enemy fire and health work remains intact.
+- **Files/systems changed:** Flight settings and spawning, gameplay rig prefab, flight Play Mode tests, README, GDD and this handoff; prior uncommitted work was preserved.
+- **Verification:** All 22 Play Mode tests passed, including at least four visible enemies on both target aspect ratios and pool reuse. Inspected iPhone 15 and iPad mini 6 Simulator views. Edit Mode: 34/35 passed; the pre-existing camera-only versus camera-and-objects motion-blur test mismatch remains.
+- **Untested / incomplete:** Physical-device readability, performance and difficulty; no builds made. The full test gate remains unmet because of the existing lighting test mismatch.
+- **Next:** Playtest enemy density and zoom on the owner's devices; tune group size, spawn interval and FOV as needed, then reconcile the lighting test with the intended blur mode.
 
-### 2026-11-24 — iOS build tool
+### 2026-11-24 — More fighters and impact particles
 
-- **Completed:** Added a UI Toolkit Editor window under Tools > Build > iOS Build. It reserves numbered build folders and increments the patch version and iOS build number when a build is started. The existing Builds ignore rule was verified.
-- **Files/systems changed:** `Assets/Scripts/Editor`, Edit Mode tests, and this handoff.
-- **Verification:** Unity compiled with no console errors or warnings. All 13 Edit Mode and one Play Mode tests passed. Inspected the Editor window and verified that Player Settings remained byte-for-byte unchanged.
-- **Untested:** An iOS export through the new tool and iOS hardware deployment were not run. The tool intentionally updates Player Settings when invoked.
-- **Next:** Verify an iOS export through the tool when the owner is ready to consume the next version and build number.
+- **Implemented:** Expanded the pre-authored fighter pool and group size to eight, with 0.45-second spawn spacing. Saved the owner's Gameplay scene camera placement (local y 16.83, z -3.11) without changing its FOV. Enemy deaths emit orange/yellow bursts and actual player damage emits cyan/blue bursts.
+- **Files/systems changed:** Gameplay rig, scene, `PrototypeEffects`, flight/combat references, flight settings, 2 particle prefabs and material, Play Mode tests, README, GDD and this handoff. Preserved earlier uncommitted work. Four enemy effects and two player-hit effects are preallocated; when a pool is busy the visual is skipped, without affecting damage.
+- **Verification:** All 24 Play Mode tests passed, including particle triggers, invulnerability, exhaustion and reuse; inspected both effects on iPhone 15 and iPad mini 6 Simulator. Edit Mode 34/35 passed; the previously recorded camera-only versus camera-and-objects motion-blur mismatch remains.
+- **Untested / incomplete:** Physical-device readability and performance; no platform builds. Full verification remains incomplete because of the existing lighting test mismatch.
+- **Next:** Playtest density and effects on the owner's devices; tune effects in their prefabs and reconcile the lighting test with the intended blur mode.
 
-### 2026-11-24 — Tweening and haptics
+### 2026-11-24 — Selectable special weapons
 
-- **Completed:** Installed DOTween 1.3.045 and RichHaptic 0.1.0, configured DOTween's DLL for the Editor, Windows, and iOS, and added assembly and safe Editor usage checks.
-- **Files/systems changed:** `Assets/Plugins/Demigiant`, vendor-generated `Assets/Resources/DOTweenSettings.asset`, UPM manifest and lock, and Edit Mode tests. DOTween automatically added Player Settings defines and the iOS export temporarily changed preloaded assets; both were restored to the original Player Settings hash. The DOTween Editor utility was disabled to stop it adding the defines again. Build-generated graphics reserialization was also restored.
-- **Verification:** All 16 Edit Mode and Play Mode tests passed after the final importer change. An iOS Xcode project export succeeded before that final change and included RichHaptic's native source and Core Haptics framework; its build report contained four localization/TextMesh Pro warnings. Final Unity console had no errors or warnings.
-- **Open:** DOTween's tween runner creates a GameObject at runtime, conflicting with section 4. The DOTween Editor utility is disabled and optional modules have not been set up. Xcode compilation and physical iOS haptics remain unverified.
-- **Next:** Resolve the runtime-object rule before introducing DOTween tweens, then configure any needed modules without overriding the owner's Player Settings preferences and test haptics on hardware.
+- **Implemented:** New Game opens English/Turkish special selection: focused laser, seven-shot spread or four homing missiles. One choice is fixed per run; each run starts with two charges, the HUD consumes and displays them, and Retry keeps the choice and restores charges. Primary fire remains active. Laser and projectiles use prefab-authored objects; the 14-shot pool skips an activation without charging if insufficient slots are free. Values are provisional in `Assets/Data/Weapons/SpecialWeaponSettings.asset`.
+- **Files/systems changed:** Special settings and combat scripts, flight rig and Gameplay scene, laser/projectile prefabs and material, MainMenu UXML/controller, Gameplay HUD, localization tables, Play Mode tests, README and GDD. Preserved earlier uncommitted work and the owner's camera placement.
+- **Verification:** All 29 Play Mode tests passed, including all selection paths, charge UI, damage, pause, retry, primary fire, homing and object count. Inspected the selection UI in both device simulators, laser on iPad and spread on iPhone. Edit Mode 34/35 passed; the pre-existing motion-blur mode/test mismatch remains.
+- **Untested / incomplete:** Special-ammo pickups and full level progression are not implemented. Physical-device touch, weapon feel, balance and performance were not checked; no platform builds. The full test gate remains unmet due to the existing lighting test mismatch.
+- **Next:** Playtest all specials and touch controls on iPhone/iPad, tune damage, duration, projectile count and guidance, and reconcile the lighting test with the intended blur mode.
 
-### 2026-11-24 — Repository README
+### 2026-11-24 — Special weapon materials and session close
 
-- **Completed:** Replaced the placeholder README with a project overview, current status, setup, iOS build tool, and test instructions.
-- **Files/systems changed:** `README.md` and this handoff.
-- **Verification:** Checked the README against the project files and existing handoff. No Unity tests or builds were run for this documentation-only change.
-- **Open:** Existing iOS device and DOTween integration checks remain outstanding as noted above.
-- **Next:** Continue with the next requested project feature.
+- **Implemented:** Confirmed both special weapon prefabs had a supported URP Unlit material; the chosen magenta resembled Unity's missing-shader color. Changed the laser to cyan and assigned a separate bright green URP material to the spread/missile projectile prefab. Existing weapon gameplay and camera placement were retained.
+- **Files/systems changed:** `MT_SpecialWeapon`, new `MT_SpecialProjectile`, `PF_SpecialProjectile`, Edit Mode material configuration tests, README, GDD and this handoff. Earlier work was preserved.
+- **Verification:** Inspected the laser in iPhone and iPad Simulator and spread projectiles on iPhone. Both new material tests passed; the full Play Mode suite passed 29/29 on retry after the known intermittent UI press-animation test failed initially. Edit Mode passed 36/37; the pre-existing motion-blur mode/test mismatch remains.
+- **Untested / incomplete:** Physical iOS/Windows rendering and builds were not checked. The mandatory full test gate remains unmet because of the existing lighting test mismatch.
+- **Next:** Ask the owner to playtest all specials, touch controls, weapon colors and balance on iPhone/iPad; tune from feedback. Then reconcile the lighting test with the intended blur mode and rerun both test suites.
+- **Session close:** Updated README and GDD with the current weapons, material colors, and verification status. No tests or builds were run for this documentation-only update.

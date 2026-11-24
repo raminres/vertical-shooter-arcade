@@ -17,7 +17,87 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: 06435666ef61a93429ffc0cff5793779, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 9590643511296
+    m_Localized: Yeni Oyun
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590685454336
+    m_Localized: Devam Et
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590685454337
+    m_Localized: "Se\xE7enekler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590685454338
+    m_Localized: "Eme\u011Fi Ge\xE7enler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648640
+    m_Localized: "Ramin Rasulzade taraf\u0131ndan geli\u015Ftirildi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648641
+    m_Localized: Geri
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648642
+    m_Localized: Dil
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648643
+    m_Localized: CAN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648644
+    m_Localized: YILDIZ
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648645
+    m_Localized: "\xD6ZEL  \xB7  2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648646
+    m_Localized: "Duraklat\u0131ld\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648647
+    m_Localized: Devam Et
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648648
+    m_Localized: "Ana Men\xFC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 105770463416320
+    m_Localized: "B\xF6l\xFCm Ba\u015Far\u0131s\u0131z"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 105770492776448
+    m_Localized: Tekrar Dene
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430604697600
+    m_Localized: "\xD6zel Silah Se\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834944
+    m_Localized: "Odakl\u0131 Lazer"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834945
+    m_Localized: "Yayl\u0131m Ate\u015Fi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834946
+    m_Localized: "G\xFCd\xFCml\xFC F\xFCzeler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 113430650834947
+    m_Localized: "\xD6ZEL"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

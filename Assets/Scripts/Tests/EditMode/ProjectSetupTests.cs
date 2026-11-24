@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.Localization;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 
 namespace VerticalShooter.Tests
 {
@@ -18,6 +19,36 @@ namespace VerticalShooter.Tests
             var collection = LocalizationEditorSettings.GetStringTableCollections()
                 .Single(table => table.TableCollectionName == "UI");
             Assert.That(collection.StringTables.Select(table => table.LocaleIdentifier.Code), Is.EquivalentTo(new[] { "en", "tr" }));
+            Assert.That(collection.SharedData.Entries.Count, Is.GreaterThan(0));
+            foreach (var key in collection.SharedData.Entries)
+            foreach (var table in collection.StringTables)
+                Assert.That(table.GetEntry(key.Id)?.Value, Is.Not.Null.And.Not.Empty,
+                    $"Missing {table.LocaleIdentifier.Code} translation for {key.Key}");
+        }
+
+        [Test]
+        public void EnglishIsSelectedBeforeSystemLanguage()
+        {
+            var selectors = LocalizationEditorSettings.ActiveLocalizationSettings.GetStartupLocaleSelectors();
+            var englishIndex = selectors.FindIndex(selector => selector is SpecificLocaleSelector specific && specific.LocaleId.Code == "en");
+            var systemIndex = selectors.FindIndex(selector => selector is SystemLocaleSelector);
+            Assert.That(englishIndex, Is.GreaterThanOrEqualTo(0));
+            Assert.That(systemIndex < 0 || englishIndex < systemIndex, Is.True);
+        }
+
+        [TestCase("iOS", BuildTarget.iOS)]
+        [TestCase("Windows", BuildTarget.StandaloneWindows64)]
+        public void BuildProfileUsesTheExpectedPlatformAndSharedSettings(string name, BuildTarget target)
+        {
+            var profile = AssetDatabase.LoadAssetAtPath<UnityEditor.Build.Profile.BuildProfile>(
+                $"Assets/Settings/Build Profiles/{name}.asset");
+            Assert.That(profile, Is.Not.Null);
+            var serialized = new SerializedObject(profile);
+            Assert.That(serialized.FindProperty("m_BuildTarget").intValue, Is.EqualTo((int)target));
+            Assert.That(serialized.FindProperty("m_OverrideGlobalSceneList").boolValue, Is.False);
+            Assert.That(serialized.FindProperty("m_PlayerSettingsYaml.m_Settings").arraySize, Is.Zero);
+            Assert.That(EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path),
+                Is.EqualTo(new[] { "Assets/Scenes/MainMenu.unity", "Assets/Scenes/Gameplay.unity" }));
         }
 
         [Test]
