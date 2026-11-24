@@ -202,3 +202,11 @@ Before reporting **done** on a task, confirm:
 - **Verification:** All 16 Edit Mode and Play Mode tests passed after the final importer change. An iOS Xcode project export succeeded before that final change and included RichHaptic's native source and Core Haptics framework; its build report contained four localization/TextMesh Pro warnings. Final Unity console had no errors or warnings.
 - **Open:** DOTween's tween runner creates a GameObject at runtime, conflicting with section 4. The DOTween Editor utility is disabled and optional modules have not been set up. Xcode compilation and physical iOS haptics remain unverified.
 - **Next:** Resolve the runtime-object rule before introducing DOTween tweens, then configure any needed modules without overriding the owner's Player Settings preferences and test haptics on hardware.
+
+### 2026-11-24 — Repository README
+
+- **Completed:** Replaced the placeholder README with a project overview, current status, setup, iOS build tool, and test instructions.
+- **Files/systems changed:** `README.md` and this handoff.
+- **Verification:** Checked the README against the project files and existing handoff. No Unity tests or builds were run for this documentation-only change.
+- **Open:** Existing iOS device and DOTween integration checks remain outstanding as noted above.
+- **Next:** Continue with the next requested project feature.
