@@ -1,0 +1,30 @@
+.screen, .game-screen {
+    flex-grow: 1;
+    background-color: rgb(18, 30, 43);
+    -unity-font: url("../Fonts/FT_Inter.ttf");
+}
+.game-screen { background-color: rgba(0, 0, 0, 0); }
+.menu { flex-grow: 1; justify-content: center; padding-left: 9%; padding-right: 9%; }
+.title { font-size: 58px; color: rgb(244, 241, 225); -unity-font: url("../Fonts/FT_Montserrat-SemiBold.ttf"); }
+.subtitle { font-size: 17px; color: rgb(239, 181, 82); margin-top: 5px; margin-bottom: 45px; }
+.menu-buttons { width: 100%; }
+.menu-button, .primary-button {
+    height: 58px; margin-top: 6px; margin-bottom: 6px;
+    font-size: 20px; color: rgb(240, 243, 243);
+    background-color: rgb(44, 62, 76);
+    border-top-width: 0; border-bottom-width: 0; border-left-width: 0; border-right-width: 0;
+}
+.primary-button { background-color: rgb(218, 153, 53); color: rgb(22, 31, 38); -unity-font: url("../Fonts/FT_Montserrat-SemiBold.ttf"); }
+.menu-button:disabled { opacity: 0.4; }
+.overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(8, 16, 24, 0.9); justify-content: center; padding-left: 9%; padding-right: 9%; }
+.hidden { display: none; }
+.dialog { background-color: rgb(27, 43, 56); padding-left: 20px; padding-right: 20px; padding-top: 22px; padding-bottom: 22px; }
+.dialog-title { font-size: 32px; color: rgb(244, 241, 225); margin-bottom: 24px; -unity-font: url("../Fonts/FT_Montserrat-SemiBold.ttf"); }
+.section-label, .body { font-size: 18px; color: rgb(221, 229, 230); margin-bottom: 15px; white-space: normal; }
+.hud-top { flex-direction: row; align-items: flex-start; padding-left: 16px; padding-right: 16px; padding-top: 16px; }
+.hud-card { flex-grow: 1; background-color: rgba(15, 29, 40, 0.82); padding-left: 12px; padding-right: 12px; padding-top: 9px; padding-bottom: 9px; margin-right: 8px; }
+.hud-label { color: rgb(196, 207, 208); font-size: 12px; }
+.hud-value { color: rgb(255, 245, 221); font-size: 22px; -unity-font: url("../Fonts/FT_Montserrat-SemiBold.ttf"); }
+.pause-button { width: 54px; height: 54px; font-size: 22px; color: rgb(255, 245, 221); background-color: rgb(44, 62, 76); }
+.hud-bottom { flex-grow: 1; justify-content: flex-end; align-items: flex-end; padding-right: 16px; padding-bottom: 20px; }
+.special-button { width: 155px; height: 62px; font-size: 16px; color: rgb(22, 31, 38); background-color: rgb(218, 153, 53); }

@@ -171,14 +171,6 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — Localization and importer setup
-
-- **Completed:** Created English and Turkish locales, empty UI string and asset table collections, and five folder-based importer presets with an Editor postprocessor. Verified imports for world textures, UI icons, sound effects, music and models.
-- **Files/systems changed:** `Assets/Localization`, `Assets/AddressableAssetsData`, `Assets/Settings/Presets`, `Assets/Scripts/Editor`, and Edit Mode setup tests.
-- **Verification:** Both test suites passed, six tests total. The string completeness check is inconclusive because no UI strings exist yet. An Addressables content build invoked through Pipeline exceeded its 60-second timeout and may still be running. Final Editor state and content build remain unverified.
-- **Open:** The three supplied font files are imported but there is no runtime UI to style. Localization content build and device checks remain unverified.
-- **Next:** Inspect the Editor after the timed-out Addressables build, verify its outcome, and use the fonts and localized entries when UI is created.
-
 ### 2026-11-24 — Preset Manager folder filters
 
 - **Completed:** Registered all five import presets in Preset Manager with folder glob filters and removed the redundant asset postprocessor.
@@ -210,3 +202,11 @@ Before reporting **done** on a task, confirm:
 - **Verification:** Checked the README against the project files and existing handoff. No Unity tests or builds were run for this documentation-only change.
 - **Open:** Existing iOS device and DOTween integration checks remain outstanding as noted above.
 - **Next:** Continue with the next requested project feature.
+
+### 2026-11-24 — Prototype scenes and menus
+
+- **Completed:** Created the `feature/scene-menu-foundation` branch, prefab-backed MainMenu and Gameplay scenes, UI Toolkit menus and HUD, pause/resume flow, and English/Turkish UI strings. Continue and the special action are disabled pending their systems.
+- **Files/systems changed:** Scenes, environment and UI prefabs, UI Toolkit assets and panel settings, runtime UI assembly, localization tables, build scene list, and Edit/Play Mode tests.
+- **Verification:** All 18 tests passed. Inspected menu, HUD and pause UI in Editor Play Mode. An iOS Xcode export and Windows build succeeded, and the Windows player launched. The iOS report included Apple localization and three TextMesh Pro warnings. The Windows report included URP shadow-array warnings after switching targets. Earlier Windows build attempts failed during the target transition before the successful retry.
+- **Open:** Real iOS device, touch, safe-area and Xcode compilation checks remain unverified. HUD values and the gameplay environment are placeholders. Continue awaits save data. The prior DOTween runtime-object conflict remains open.
+- **Next:** Review the prototype menus and choose the next gameplay feature. Player Settings and the iOS build target were restored after verification.

@@ -18,6 +18,11 @@ namespace VerticalShooter.Tests
             var collection = LocalizationEditorSettings.GetStringTableCollections()
                 .Single(table => table.TableCollectionName == "UI");
             Assert.That(collection.StringTables.Select(table => table.LocaleIdentifier.Code), Is.EquivalentTo(new[] { "en", "tr" }));
+            Assert.That(collection.SharedData.Entries.Count, Is.GreaterThan(0));
+            foreach (var key in collection.SharedData.Entries)
+            foreach (var table in collection.StringTables)
+                Assert.That(table.GetEntry(key.Id)?.Value, Is.Not.Null.And.Not.Empty,
+                    $"Missing {table.LocaleIdentifier.Code} translation for {key.Key}");
         }
 
         [Test]

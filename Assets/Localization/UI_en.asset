@@ -17,7 +17,59 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: 06435666ef61a93429ffc0cff5793779, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 9590643511296
+    m_Localized: New Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590685454336
+    m_Localized: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590685454337
+    m_Localized: Options
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590685454338
+    m_Localized: Credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648640
+    m_Localized: A game by Ramin Rasulzade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648641
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648642
+    m_Localized: Language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648643
+    m_Localized: HEALTH
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648644
+    m_Localized: STARS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648645
+    m_Localized: "SPECIAL  \xB7  2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648646
+    m_Localized: Paused
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648647
+    m_Localized: Resume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9590689648648
+    m_Localized: Main Menu
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

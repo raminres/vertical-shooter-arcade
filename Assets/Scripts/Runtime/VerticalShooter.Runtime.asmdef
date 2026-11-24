@@ -1,0 +1,5 @@
+{
+  "name": "VerticalShooter.Runtime",
+  "references": ["Unity.Localization", "Unity.ResourceManager"],
+  "autoReferenced": true
+}

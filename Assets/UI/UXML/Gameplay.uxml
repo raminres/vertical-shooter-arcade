@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="safe-area" class="game-screen">
+        <Style src="project://database/Assets/UI/USS/Prototype.uss" />
+        <ui:VisualElement class="hud-top">
+            <ui:VisualElement class="hud-card">
+                <ui:Label name="health-label" text="HEALTH" class="hud-label" />
+                <ui:Label name="health-value" text="10 / 10" class="hud-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-card">
+                <ui:Label name="stars-label" text="STARS" class="hud-label" />
+                <ui:Label name="stars-value" text="0" class="hud-value" />
+            </ui:VisualElement>
+            <ui:Button name="pause" text="Ⅱ" class="pause-button" />
+        </ui:VisualElement>
+        <ui:VisualElement class="hud-bottom">
+            <ui:Button name="special" text="SPECIAL  ·  2" class="special-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="pause-panel" class="overlay hidden">
+            <ui:VisualElement class="dialog">
+                <ui:Label name="pause-title" text="Paused" class="dialog-title" />
+                <ui:Button name="resume" text="Resume" class="primary-button" />
+                <ui:Button name="options" text="Options" class="menu-button" />
+                <ui:Button name="main-menu" text="Main Menu" class="menu-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="options-panel" class="overlay hidden">
+            <ui:VisualElement class="dialog">
+                <ui:Label name="options-title" text="Options" class="dialog-title" />
+                <ui:Label name="language-label" text="Language" class="section-label" />
+                <ui:Button name="english" text="English" class="menu-button" />
+                <ui:Button name="turkish" text="Türkçe" class="menu-button" />
+                <ui:Button name="options-back" text="Back" class="menu-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
