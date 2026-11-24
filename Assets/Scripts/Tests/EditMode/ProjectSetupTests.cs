@@ -36,6 +36,21 @@ namespace VerticalShooter.Tests
             Assert.That(systemIndex < 0 || englishIndex < systemIndex, Is.True);
         }
 
+        [TestCase("iOS", BuildTarget.iOS)]
+        [TestCase("Windows", BuildTarget.StandaloneWindows64)]
+        public void BuildProfileUsesTheExpectedPlatformAndSharedSettings(string name, BuildTarget target)
+        {
+            var profile = AssetDatabase.LoadAssetAtPath<UnityEditor.Build.Profile.BuildProfile>(
+                $"Assets/Settings/Build Profiles/{name}.asset");
+            Assert.That(profile, Is.Not.Null);
+            var serialized = new SerializedObject(profile);
+            Assert.That(serialized.FindProperty("m_BuildTarget").intValue, Is.EqualTo((int)target));
+            Assert.That(serialized.FindProperty("m_OverrideGlobalSceneList").boolValue, Is.False);
+            Assert.That(serialized.FindProperty("m_PlayerSettingsYaml.m_Settings").arraySize, Is.Zero);
+            Assert.That(EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path),
+                Is.EqualTo(new[] { "Assets/Scenes/MainMenu.unity", "Assets/Scenes/Gameplay.unity" }));
+        }
+
         [Test]
         public void UiIconImportUsesSpritePreset()
         {

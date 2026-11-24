@@ -171,14 +171,6 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — Repository README
-
-- **Completed:** Replaced the placeholder README with a project overview, current status, setup, iOS build tool, and test instructions.
-- **Files/systems changed:** `README.md` and this handoff.
-- **Verification:** Checked the README against the project files and existing handoff. No Unity tests or builds were run for this documentation-only change.
-- **Open:** Existing iOS device and DOTween integration checks remain outstanding as noted above.
-- **Next:** Continue with the next requested project feature.
-
 ### 2026-11-24 — Prototype scenes and menus
 
 - **Completed:** Created the `feature/scene-menu-foundation` branch, prefab-backed MainMenu and Gameplay scenes, UI Toolkit menus and HUD, pause/resume flow, and English/Turkish UI strings. Continue and the special action are disabled pending their systems.
@@ -210,3 +202,11 @@ Before reporting **done** on a task, confirm:
 - **Verification:** Unity compiled, all 23 Edit Mode and Play Mode tests passed, including every main-menu hover state, disabled behavior, simulated touch entry, paused press, and locale selector order. The Game view displayed English. Console reported no current errors or warnings.
 - **Untested:** Physical mouse interaction and iOS touch were not directly inspected; the computer-use native connection was unavailable. Device Simulator simulates touch rather than continuous hover. Platform builds were not run.
 - **Next:** Try mouse hover in Game view and tap feedback in Device Simulator and on physical devices.
+
+### 2026-11-24 — iOS and Windows build profiles
+
+- **Completed:** Created iOS and Windows 64-bit Player Build Profiles in `Assets/Settings/Build Profiles`; both inherit the shared scene list and Player Settings. Neither profile was activated, and Player Settings remained byte-for-byte unchanged.
+- **Files/systems changed:** Build Profile assets and metadata; Edit Mode configuration checks; this handoff.
+- **Verification:** Unity compiled, the Build Profiles window lists both profiles, and an iOS profile dry run resolved MainMenu and Gameplay in order. All 25 Edit Mode and Play Mode tests passed on the second run; the first run failed two existing UI animation tests, indicating intermittent behavior. Console ended without current errors or warnings.
+- **Untested:** No new iOS or Windows builds or device checks were run; the Windows profile was not activated or build-validated.
+- **Next:** Switch to the desired profile in File > Build Profiles and build; investigate the intermittent UI animation tests if they recur. The custom iOS build tool remains the path that increments version and build numbers.
