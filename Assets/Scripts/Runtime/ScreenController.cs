@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UIElements;
+using Screen = UnityEngine.Device.Screen;
 
 namespace VerticalShooter.UI
 {
@@ -22,6 +23,7 @@ namespace VerticalShooter.UI
             root = GetComponent<UIDocument>().rootVisualElement;
             safeArea = root.Q<VisualElement>("safe-area");
             root.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            root.Query<Button>().ForEach(RegisterButtonHover);
             ApplySafeArea();
         }
 
@@ -29,11 +31,45 @@ namespace VerticalShooter.UI
         {
             if (root != null)
                 root.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            root.Query<Button>().ForEach(UnregisterButtonHover);
             foreach (var item in strings)
                 item.value.StringChanged -= item.handler;
             strings.Clear();
             root.Q<Button>("english").clicked -= SelectEnglish;
             root.Q<Button>("turkish").clicked -= SelectTurkish;
+        }
+
+        private static void RegisterButtonHover(Button button)
+        {
+            button.RegisterCallback<PointerEnterEvent>(OnButtonPointerEnter);
+            button.RegisterCallback<PointerLeaveEvent>(OnButtonPointerLeave);
+            button.RegisterCallback<PointerDownEvent>(OnButtonPointerDown);
+        }
+
+        private static void UnregisterButtonHover(Button button)
+        {
+            button.UnregisterCallback<PointerEnterEvent>(OnButtonPointerEnter);
+            button.UnregisterCallback<PointerLeaveEvent>(OnButtonPointerLeave);
+            button.UnregisterCallback<PointerDownEvent>(OnButtonPointerDown);
+            button.RemoveFromClassList("mouse-hover");
+        }
+
+        private static void OnButtonPointerEnter(PointerEnterEvent evt)
+        {
+            if (evt.pointerType == UnityEngine.UIElements.PointerType.mouse)
+                ((Button)evt.currentTarget).AddToClassList("mouse-hover");
+        }
+
+        private static void OnButtonPointerLeave(PointerLeaveEvent evt)
+        {
+            if (evt.pointerType == UnityEngine.UIElements.PointerType.mouse)
+                ((Button)evt.currentTarget).RemoveFromClassList("mouse-hover");
+        }
+
+        private static void OnButtonPointerDown(PointerDownEvent evt)
+        {
+            if (evt.pointerType == UnityEngine.UIElements.PointerType.touch)
+                ((Button)evt.currentTarget).RemoveFromClassList("mouse-hover");
         }
 
         private void Update()
@@ -55,10 +91,13 @@ namespace VerticalShooter.UI
             float scaleY = root.resolvedStyle.height / Screen.height;
             if (float.IsNaN(scaleX) || float.IsNaN(scaleY) || scaleX <= 0 || scaleY <= 0)
                 return;
-            safeArea.style.paddingLeft = previousSafeArea.xMin * scaleX;
-            safeArea.style.paddingRight = (Screen.width - previousSafeArea.xMax) * scaleX;
-            safeArea.style.paddingTop = (Screen.height - previousSafeArea.yMax) * scaleY;
-            safeArea.style.paddingBottom = previousSafeArea.yMin * scaleY;
+            Vector4 insets = SafeAreaInsets.Calculate(previousSafeArea,
+                new Vector2(Screen.width, Screen.height),
+                new Vector2(root.resolvedStyle.width, root.resolvedStyle.height));
+            safeArea.style.paddingLeft = insets.x;
+            safeArea.style.paddingTop = insets.y;
+            safeArea.style.paddingRight = insets.z;
+            safeArea.style.paddingBottom = insets.w;
         }
 
         protected void Bind(string elementName, string key)
@@ -96,3 +135,4 @@ namespace VerticalShooter.UI
         }
     }
 }
+

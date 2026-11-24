@@ -171,30 +171,6 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — Preset Manager folder filters
-
-- **Completed:** Registered all five import presets in Preset Manager with folder glob filters and removed the redundant asset postprocessor.
-- **Files/systems changed:** `ProjectSettings/PresetManager.asset`, `Assets/Scripts/Editor`, and this handoff.
-- **Verification:** Fresh sample imports received the expected settings for all five categories. Both test suites passed, six tests total.
-- **Open:** Existing assets need an importer Reset to receive changed defaults. The earlier Addressables content build timed out and its outcome remains unverified.
-- **Next:** Add the first requested UI or gameplay feature and populate localization tables as text is designed.
-
-### 2026-11-24 — iOS build tool
-
-- **Completed:** Added a UI Toolkit Editor window under Tools > Build > iOS Build. It reserves numbered build folders and increments the patch version and iOS build number when a build is started. The existing Builds ignore rule was verified.
-- **Files/systems changed:** `Assets/Scripts/Editor`, Edit Mode tests, and this handoff.
-- **Verification:** Unity compiled with no console errors or warnings. All 13 Edit Mode and one Play Mode tests passed. Inspected the Editor window and verified that Player Settings remained byte-for-byte unchanged.
-- **Untested:** An iOS export through the new tool and iOS hardware deployment were not run. The tool intentionally updates Player Settings when invoked.
-- **Next:** Verify an iOS export through the tool when the owner is ready to consume the next version and build number.
-
-### 2026-11-24 — Tweening and haptics
-
-- **Completed:** Installed DOTween 1.3.045 and RichHaptic 0.1.0, configured DOTween's DLL for the Editor, Windows, and iOS, and added assembly and safe Editor usage checks.
-- **Files/systems changed:** `Assets/Plugins/Demigiant`, vendor-generated `Assets/Resources/DOTweenSettings.asset`, UPM manifest and lock, and Edit Mode tests. DOTween automatically added Player Settings defines and the iOS export temporarily changed preloaded assets; both were restored to the original Player Settings hash. The DOTween Editor utility was disabled to stop it adding the defines again. Build-generated graphics reserialization was also restored.
-- **Verification:** All 16 Edit Mode and Play Mode tests passed after the final importer change. An iOS Xcode project export succeeded before that final change and included RichHaptic's native source and Core Haptics framework; its build report contained four localization/TextMesh Pro warnings. Final Unity console had no errors or warnings.
-- **Open:** DOTween's tween runner creates a GameObject at runtime, conflicting with section 4. The DOTween Editor utility is disabled and optional modules have not been set up. Xcode compilation and physical iOS haptics remain unverified.
-- **Next:** Resolve the runtime-object rule before introducing DOTween tweens, then configure any needed modules without overriding the owner's Player Settings preferences and test haptics on hardware.
-
 ### 2026-11-24 — Repository README
 
 - **Completed:** Replaced the placeholder README with a project overview, current status, setup, iOS build tool, and test instructions.
@@ -210,3 +186,27 @@ Before reporting **done** on a task, confirm:
 - **Verification:** All 18 tests passed. Inspected menu, HUD and pause UI in Editor Play Mode. An iOS Xcode export and Windows build succeeded, and the Windows player launched. The iOS report included Apple localization and three TextMesh Pro warnings. The Windows report included URP shadow-array warnings after switching targets. Earlier Windows build attempts failed during the target transition before the successful retry.
 - **Open:** Real iOS device, touch, safe-area and Xcode compilation checks remain unverified. HUD values and the gameplay environment are placeholders. Continue awaits save data. The prior DOTween runtime-object conflict remains open.
 - **Next:** Review the prototype menus and choose the next gameplay feature. Player Settings and the iOS build target were restored after verification.
+
+### 2026-11-24 — UI interaction and device layouts
+
+- **Completed:** Added button hover and pressed styles, set the UI reference resolution to 1179 × 2556, and changed safe-area calculations to use the Device Simulator-aware screen API. Added iPhone 15 and iPad mini 6 simulator profiles; the iPad safe-area insets are estimates.
+- **Files/systems changed:** UI USS and PanelSettings, runtime safe-area calculation, Edit Mode tests, and Device Simulator profiles. Player Settings remained unchanged.
+- **Verification:** Unity compiled; all 20 Edit Mode and Play Mode tests passed. Inspected the main menu in Play Mode for both simulator profiles with safe-area highlighting, and verified the simulator reported each profile's dimensions and safe area.
+- **Untested:** Physical iOS safe areas, touch feedback, Xcode compilation, and new Windows/iOS builds were not checked in this session. The iPad mini safe-area values require verification on hardware.
+- **Next:** Verify menu, gameplay and pause screens, touch feedback and safe areas on the owner's iPhone 15 and iPad mini 6, and run platform builds at the next suitable milestone.
+
+### 2026-11-24 — Button animation polish
+
+- **Completed:** Added UI Toolkit transitions for button scale and color on hover and press, including pause-menu buttons; disabled buttons do not respond. Player Settings remained unchanged.
+- **Files/systems changed:** `Assets/UI/USS/Prototype.uss` and Play Mode UI tests.
+- **Verification:** Unity compiled successfully; all 21 Edit Mode and Play Mode tests passed, including hover and press state checks while time is paused. Inspected the running simulator and checked the resolved hover and pressed styles with simulated pointer input.
+- **Untested:** Physical iOS touch feedback and new platform builds remain unverified.
+- **Next:** Try the button feel on iPhone and iPad and adjust timing or scale if desired.
+
+### 2026-11-24 — Simulator hover and English default
+
+- **Completed:** Made English the startup locale before the system language, retaining the language buttons and command-line override. Mouse hover uses a class driven by mouse pointer events, preventing simulated touch from leaving a button in the hover state; touch retains the press animation.
+- **Files/systems changed:** Localization Settings, UI Toolkit stylesheet and screen controller, Edit Mode and Play Mode tests. Player Settings remained unchanged.
+- **Verification:** Unity compiled, all 23 Edit Mode and Play Mode tests passed, including every main-menu hover state, disabled behavior, simulated touch entry, paused press, and locale selector order. The Game view displayed English. Console reported no current errors or warnings.
+- **Untested:** Physical mouse interaction and iOS touch were not directly inspected; the computer-use native connection was unavailable. Device Simulator simulates touch rather than continuous hover. Platform builds were not run.
+- **Next:** Try mouse hover in Game view and tap feedback in Device Simulator and on physical devices.

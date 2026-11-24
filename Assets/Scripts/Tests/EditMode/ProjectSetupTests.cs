@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.Localization;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 
 namespace VerticalShooter.Tests
 {
@@ -23,6 +24,16 @@ namespace VerticalShooter.Tests
             foreach (var table in collection.StringTables)
                 Assert.That(table.GetEntry(key.Id)?.Value, Is.Not.Null.And.Not.Empty,
                     $"Missing {table.LocaleIdentifier.Code} translation for {key.Key}");
+        }
+
+        [Test]
+        public void EnglishIsSelectedBeforeSystemLanguage()
+        {
+            var selectors = LocalizationEditorSettings.ActiveLocalizationSettings.GetStartupLocaleSelectors();
+            var englishIndex = selectors.FindIndex(selector => selector is SpecificLocaleSelector specific && specific.LocaleId.Code == "en");
+            var systemIndex = selectors.FindIndex(selector => selector is SystemLocaleSelector);
+            Assert.That(englishIndex, Is.GreaterThanOrEqualTo(0));
+            Assert.That(systemIndex < 0 || englishIndex < systemIndex, Is.True);
         }
 
         [Test]
