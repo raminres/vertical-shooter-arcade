@@ -1,8 +1,22 @@
 # Vertical Shooter — Game Design Document
 
-**Version:** 0.1 — consolidated decision record  
-**Date:** 31 October 2026  
-**Status:** Pre-prototype. This document records agreed design intent; numerical targets remain subject to playtesting.
+**Version:** 0.2 — design and prototype status
+
+**Updated:** 24 November 2026
+
+**Status:** Prototype menu and scene foundation. Gameplay systems and numerical targets remain to be implemented and playtested.
+
+## Current implementation status
+
+The sections below record agreed design intent, not a list of implemented gameplay features. The current project contains:
+
+- A `MainMenu` scene with New Game, Continue, Options, and Credits. New Game opens the `Gameplay` scene; Continue is disabled until save/progress functionality exists.
+- A `Gameplay` scene with a placeholder environment and HUD for health, stars, and a special action. The HUD values are placeholders and the special action is disabled. The pause menu provides Resume, Options, and Main Menu.
+- English and Turkish UI strings, with English selected by default and a language selector in Options. Language selection is not yet persisted between sessions.
+- UI Toolkit button hover and press transitions, portrait scaling, and safe-area handling. The reference resolution is iPhone 15 (1179 × 2556); iPhone 15 and iPad mini 6 simulator profiles are present, with estimated iPad safe-area insets. Physical-device layout and touch checks remain outstanding.
+- iOS and Windows build profiles that use the shared scene list and Player Settings. The custom iOS Editor tool provides numbered output folders and version/build increments when invoked.
+
+Player movement, weapons, enemies, waves, levels, progression, saving, and the other mechanics described below are **planned, not implemented**. The immediate next feature has not yet been chosen; select it with the project owner before expanding the prototype.
 
 ## 1. Overview and Scope
 
@@ -175,4 +189,4 @@ Do **not** finalize the following from written estimates alone:
 - Ground-turret placement synchronized with encounter-gated spawning while terrain scrolls continuously.
 - Boss patterns, environment arrangement, final visual palette, UI styling, SFX, and detailed level layouts.
 
-**Design status:** Sufficiently specified to begin a short playable prototype. Exact balance values and further level-by-level design should remain provisional until the mechanics have been tested.
+**Design status:** The scene and UI foundation is in place, but the playable shooter prototype has not yet been built. Exact balance values and further level-by-level design should remain provisional until the mechanics have been tested.

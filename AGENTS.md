@@ -11,7 +11,9 @@
 - **Input:** Unity's **new Input System** (`com.unity.inputsystem`) exclusively; no new `UnityEngine.Input` / legacy Input Manager usage.
 - **UI:** **UI Toolkit** for runtime and Editor UI. Prefer UXML for structure, USS for styling, and C# for behavior.
 - **Tweening and haptics:** DOTween 1.3.045 is installed under `Assets/Plugins/Demigiant/DOTween` from the vendor download. RichHaptic 0.1.0 is installed via Unity Package Manager for iOS haptic feedback. Reference `RichHaptic.Runtime` from assemblies that use it. DOTween's standard tween runner creates a runtime GameObject, which conflicts with section 4; resolve that conflict with the owner before using the runner in gameplay. DOTween's Editor utility is disabled because it automatically changes Player Settings. Its optional modules are not configured. The plugin generated `Assets/Resources/DOTweenSettings.asset` as part of its installation.
-- **Player Settings:** Preserve the owner's Player Settings unless the owner explicitly requests a change.
+- **Player Settings:** Preserve the owner's Player Settings unless the owner explicitly requests a change. The iOS build tool intentionally increments version and build number when the owner starts a build through it.
+- **Build profiles:** `Assets/Settings/Build Profiles/iOS.asset` and `Windows.asset` inherit Player Settings and the shared MainMenu/Gameplay scene list. A build from the Build Profiles window does not invoke the custom iOS numbering tool.
+- **Current UI and localization:** MainMenu and Gameplay contain prototype menus, a placeholder HUD, and pause flow; Continue and the special action are disabled. English is the default; Turkish is selectable in Options. The UI reference is 1179 × 2556, with iPhone 15 and iPad mini 6 simulator profiles. The iPad safe-area insets are estimates, and real-device checks are outstanding. Device Simulator uses touch, so verify mouse hover in Game view.
 - **Design scope:** A small 3D vertical-scrolling shooter with movement constrained to a 2D playfield and a perspective camera. Follow the approved GDD when it is present; do not infer that an unapproved idea is a requirement.
 
 ## 2. Mandatory session workflow
@@ -171,14 +173,6 @@ Before reporting **done** on a task, confirm:
 
 > Maintain a concise rolling log of the last five work sessions. Do not invent changes or test results. If no project was accessible, say so explicitly.
 
-### 2026-11-24 — Prototype scenes and menus
-
-- **Completed:** Created the `feature/scene-menu-foundation` branch, prefab-backed MainMenu and Gameplay scenes, UI Toolkit menus and HUD, pause/resume flow, and English/Turkish UI strings. Continue and the special action are disabled pending their systems.
-- **Files/systems changed:** Scenes, environment and UI prefabs, UI Toolkit assets and panel settings, runtime UI assembly, localization tables, build scene list, and Edit/Play Mode tests.
-- **Verification:** All 18 tests passed. Inspected menu, HUD and pause UI in Editor Play Mode. An iOS Xcode export and Windows build succeeded, and the Windows player launched. The iOS report included Apple localization and three TextMesh Pro warnings. The Windows report included URP shadow-array warnings after switching targets. Earlier Windows build attempts failed during the target transition before the successful retry.
-- **Open:** Real iOS device, touch, safe-area and Xcode compilation checks remain unverified. HUD values and the gameplay environment are placeholders. Continue awaits save data. The prior DOTween runtime-object conflict remains open.
-- **Next:** Review the prototype menus and choose the next gameplay feature. Player Settings and the iOS build target were restored after verification.
-
 ### 2026-11-24 — UI interaction and device layouts
 
 - **Completed:** Added button hover and pressed styles, set the UI reference resolution to 1179 × 2556, and changed safe-area calculations to use the Device Simulator-aware screen API. Added iPhone 15 and iPad mini 6 simulator profiles; the iPad safe-area insets are estimates.
@@ -210,3 +204,11 @@ Before reporting **done** on a task, confirm:
 - **Verification:** Unity compiled, the Build Profiles window lists both profiles, and an iOS profile dry run resolved MainMenu and Gameplay in order. All 25 Edit Mode and Play Mode tests passed on the second run; the first run failed two existing UI animation tests, indicating intermittent behavior. Console ended without current errors or warnings.
 - **Untested:** No new iOS or Windows builds or device checks were run; the Windows profile was not activated or build-validated.
 - **Next:** Switch to the desired profile in File > Build Profiles and build; investigate the intermittent UI animation tests if they recur. The custom iOS build tool remains the path that increments version and build numbers.
+
+### 2026-11-24 — Documentation and handoff refresh
+
+- **Completed:** Updated README and GDD to distinguish the prototype scenes and menus from planned gameplay, and documented localization, device layouts, build profiles, and the custom iOS build tool. Refreshed this file's project baseline and rolling handoff.
+- **Files/systems changed:** `README.md`, `GDD.md`, and `AGENTS.md` only. The project was on `feature/scene-menu-foundation` with a clean working tree before these edits.
+- **Verification:** Compared the documents with the current scenes, UI, localization settings, build profiles, project configuration, Git history, and prior test results. The connected Unity Editor reported ready. No tests or builds were run for this documentation-only session.
+- **Open:** Physical iPhone 15/iPad mini 6 layout and touch checks, new profile-based Windows/iOS builds, and an export through the custom iOS tool remain unverified. Two existing UI animation tests failed intermittently on the first run in the previous session, then all 25 tests passed. DOTween's runtime GameObject conflicts with the prefab-only rule.
+- **Next:** Ask the owner which gameplay feature to prototype next; no specific next feature has been approved. Before implementing it, review the GDD and current branch, preserve Player Settings, and run the required tests.
